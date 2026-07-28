@@ -16,8 +16,8 @@ def input_type(s):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getusers = (
-    conquest.createCommand(name="get-users", description="List all users in the domain.", example="get-users -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local -a description,mail",
-                           message="Tasked agent to enumerate conquest users.", mitre=["T1087.002"])
+    conquest.createCommand(name="get-users", description="List all users in the domain.", example="get-users --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local --a description,mail",
+                           message="Tasked agent to enumerate domain users.", mitre=["T1087.002"])
             .addFlagString("--ou", "path", "OU path to search.")
             .addFlagString("--dc", "fqdn", "FQDN of the domain controller.")
             .addFlagString("--attributes", "attributes", "Comma-separated list of attributes to retrieve.")
@@ -44,8 +44,8 @@ cmd_getusers = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getcomputers = (
-    conquest.createCommand(name="get-computers", description="List all computers in the domain.", example="get-computers -ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local -a description,operatingSystem",
-                           message="Tasked agent to enumerate conquest computers.", mitre=["T1087.002"])
+    conquest.createCommand(name="get-computers", description="List all computers in the domain.", example="get-computers --ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local --a description,operatingSystem",
+                           message="Tasked agent to enumerate domain computers.", mitre=["T1087.002"])
             .addFlagString("--ou", "path", "OU path to search.")
             .addFlagString("--dc", "fqdn", "FQDN of the domain controller.")
             .addFlagString("--attributes", "attributes", "Comma-separated list of attributes to retrieve.")
@@ -72,8 +72,8 @@ cmd_getcomputers = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getgroups = (
-    conquest.createCommand(name="get-groups", description="List all groups in the domain.", example="get-groups -ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local -a description,member",
-                           message="Tasked agent to enumerate conquest groups.", mitre=["T1069.002"])
+    conquest.createCommand(name="get-groups", description="List all groups in the domain.", example="get-groups --ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local --a description,member",
+                           message="Tasked agent to enumerate domain groups.", mitre=["T1069.002"])
             .addFlagString("--ou", "path", "OU path to search.")
             .addFlagString("--dc", "fqdn", "FQDN of the domain controller.")
             .addFlagString("--attributes", "attributes", "Comma-separated list of attributes to retrieve.")
@@ -100,7 +100,7 @@ cmd_getgroups = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getusergroups = (
-    conquest.createCommand(name="get-usergroups", description="List all groups a user is a member of.", example="get-usergroups julius -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-usergroups", description="List all groups a user is a member of.", example="get-usergroups julius --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query user group memberships.", mitre=["T1069.002"])
             .addArgString("user", "Username or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -129,7 +129,7 @@ cmd_getusergroups = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getgroupmembers = (
-    conquest.createCommand(name="get-groupmembers", description="List all members of a group.", example="get-groupmembers \"Domain Admins\" -ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-groupmembers", description="List all members of a group.", example="get-groupmembers \"Domain Admins\" --ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query group members.", mitre=["T1069.002"])
             .addArgString("group", "Group name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -155,7 +155,7 @@ cmd_getgroupmembers = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getobject = (
-    conquest.createCommand(name="get-object", description="Get all attributes of an object.", example="get-object julius -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-object", description="Get all attributes of an object.", example="get-object julius --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query object attributes.", mitre=["T1087.002"])
             .addArgString("target", "Object name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -184,8 +184,8 @@ cmd_getobject = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getdomaininfo = (
-    conquest.createCommand(name="get-domaininfo", description="Get conquest information from rootDSE.", example="get-domaininfo --dc dc01.conquest.local",
-                           message="Tasked agent to query conquest information.", mitre=["T1087.002"])
+    conquest.createCommand(name="get-domaininfo", description="Get domain information from rootDSE.", example="get-domaininfo --dc dc01.conquest.local",
+                           message="Tasked agent to query domain information.", mitre=["T1087.002"])
             .addFlagString("--dc", "fqdn", "FQDN of the domain controller.")
             .addFlagBool("--ldaps", "Use LDAPS (port 636).")
             .setHandler(lambda agentId, cmdline, args: (
@@ -228,7 +228,7 @@ cmd_getmaq = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getwritable = (
-    conquest.createCommand(name="get-writable", description="Find objects you have write access to.", example="get-writable -ou \"OU=Projects,DC=conquest,DC=local\" --dc dc01.conquest.local --detailed",
+    conquest.createCommand(name="get-writable", description="Find objects you have write access to.", example="get-writable --ou \"OU=Projects,DC=conquest,DC=local\" --dc dc01.conquest.local --detailed",
                            message="Tasked agent to find writable objects.", mitre=["T1087.002"])
             .addFlagString("--ou", "path", "OU path to search.")
             .addFlagString("--dc", "fqdn", "FQDN of the domain controller.")
@@ -256,7 +256,7 @@ cmd_getwritable = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getdelegation = (
-    conquest.createCommand(name="get-delegation", description="Get delegation configuration for an object.", example="get-delegation machine01$ -ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-delegation", description="Get delegation configuration for an object.", example="get-delegation machine01$ --ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query delegation configuration.", mitre=["T1087.002"])
             .addArgString("target", "Object name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -285,7 +285,7 @@ cmd_getdelegation = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getuac = (
-    conquest.createCommand(name="get-uac", description="Get UAC flags for an object.", example="get-uac julius -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-uac", description="Get UAC flags for an object.", example="get-uac julius --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query UAC flags.", mitre=["T1087.002"])
             .addArgString("target", "Object name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -314,7 +314,7 @@ cmd_getuac = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getattribute = (
-    conquest.createCommand(name="get-attribute", description="Get specific attribute values.", example="get-attribute julius objectSid,mail,description -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-attribute", description="Get specific attribute values.", example="get-attribute julius objectSid,mail,description --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query attribute values.", mitre=["T1087.002"])
             .addArgString("target", "Object name or DN.", True)
             .addArgString("attributes", "Comma-separated list of attribute names.", True)
@@ -346,7 +346,7 @@ cmd_getattribute = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getspn = (
-    conquest.createCommand(name="get-spn", description="Get SPNs for an object.", example="get-spn machine01$ -ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-spn", description="Get SPNs for an object.", example="get-spn machine01$ --ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query SPNs.", mitre=["T1087.002"])
             .addArgString("target", "Object name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -375,7 +375,7 @@ cmd_getspn = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getacl = (
-    conquest.createCommand(name="get-acl", description="Get ACL/security descriptor for an object.", example="get-acl julius -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local --resolve",
+    conquest.createCommand(name="get-acl", description="Get ACL/security descriptor for an object.", example="get-acl julius --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local --resolve",
                            message="Tasked agent to query ACL.", mitre=["T1087.002"])
             .addArgString("target", "Object name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -407,7 +407,7 @@ cmd_getacl = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_getrbcd = (
-    conquest.createCommand(name="get-rbcd", description="Get RBCD configuration for an object.", example="get-rbcd somecomputer$ -ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="get-rbcd", description="Get RBCD configuration for an object.", example="get-rbcd WEB01$ --ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to query RBCD configuration.", mitre=["T1087.002"])
             .addArgString("target", "Object name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -438,7 +438,7 @@ cmd_getrbcd = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_adduser = (
-    conquest.createCommand(name="add-user", description="Add a user to the domain.", example="add-user julius 'P@ssw0rd!' -fn Jane -ln Doe -email julius@conquest.local -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="add-user", description="Add a user to the domain.", example="add-user julius 'P@ssw0rd!' --fn Julius --ln Caesar --email julius@conquest.local --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to add a domain user.", mitre=["T1136.002"])
             .addArgString("username", "Username or DN.", True)
             .addArgString("password", "Password for the user.", True)
@@ -458,6 +458,7 @@ cmd_adduser = (
                 disabled := int(conquest.get_bool(args, 5)),
                 ou := conquest.get_string(args, 6),
                 dc := conquest.get_string(args, 7),
+                ldaps := int(conquest.get_bool(args, 8)),
 
                 bof := os.path.join(SCRIPT_DIR, f"_bin/LDAP/add-user.{conquest.arch(agentId)}.o"),
                 params := conquest.bof_pack("zizzzzizzi", [
@@ -470,7 +471,7 @@ cmd_adduser = (
                     disabled,               # i: Create disabled
                     ou,                     # z: OU path
                     dc,                     # z: Domain Controller
-                    1                       # i: Use LDAPS (forced)
+                    ldaps                   # i: Use LDAPS
                 ]),
 
                 conquest.execute_alias(agentId, cmdline, f"bof {bof} {params}") if os.path.exists(bof)
@@ -481,7 +482,7 @@ cmd_adduser = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_addcomputer = (
-    conquest.createCommand(name="add-computer", description="Add a computer to the domain.", example="add-computer FAKE01 -p 'Password123!' -ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="add-computer", description="Add a computer to the domain.", example="add-computer FAKE01 'Password123!' --ou \"OU=Computers,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to add a domain computer.", mitre=["T1136.002"])
             .addArgString("computer", "Computer name or DN.", True)
             .addArgString("password", "Password for the computer (default: Randomized).")
@@ -516,7 +517,7 @@ cmd_addcomputer = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_addgroup = (
-    conquest.createCommand(name="add-group", description="Add a group to the domain.", example="add-group Stark --desc \"House Stark\" -scope global -ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="add-group", description="Add a group to the domain.", example="add-group WksAdmins --desc \"Workstation Admins\" --scope global --ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to add a domain group.", mitre=["T1136.002"])
             .addArgString("groupname", "Group name or DN.", True)
             .addFlagString("--desc", "description", "Group description.")
@@ -554,7 +555,7 @@ cmd_addgroup = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_addgroupmember = (
-    conquest.createCommand(name="add-groupmember", description="Add a member to a group.", example="add-groupmember Stark julius -ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="add-groupmember", description="Add a member to a group.", example="add-groupmember \"Domain Admins\" julius --ou \"OU=Groups,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to add group member.", mitre=["T1098"])
             .addArgString("group", "Group name or DN.", True)
             .addArgString("member", "Member name or DN.", True)
@@ -956,7 +957,7 @@ cmd_addgenericwrite = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_adddcsync = (
-    conquest.createCommand(name="add--dcsync", description="Add a DCSync ACE to an object's DACL.", example="add--dcsync DC=conquest,DC=local julius --dc dc01.conquest.local",
+    conquest.createCommand(name="add-dcsync", description="Add a DCSync ACE to an object's DACL.", example="add-dcsync DC=conquest,DC=local julius --dc dc01.conquest.local",
                            message="Tasked agent to add DCSync ACE.", mitre=["T1222.001"])
             .addArgString("target", "Target object name or DN.", True)
             .addArgString("trustee", "Trustee name or DN.", True)
@@ -1096,7 +1097,7 @@ cmd_addconstrained = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_setpassword = (
-    conquest.createCommand(name="set-password", description="Set/reset a user's password.", example="set-password julius 'N3wP@ssw0rd!' -old 'OldP@ss' --dc dc01.conquest.local",
+    conquest.createCommand(name="set-password", description="Set/reset a user's password.", example="set-password julius 'N3wP@ssw0rd!' --old 'OldP@ss' --dc dc01.conquest.local",
                            message="Tasked agent to set password.", mitre=["T1098"])
             .addArgString("target", "User name or DN.", True)
             .addArgString("password", "New password.", True)
@@ -1367,7 +1368,7 @@ cmd_removegroupmember = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_removeobject = (
-    conquest.createCommand(name="remove-object", description="Remove an object from the domain.", example="remove-object julius -ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
+    conquest.createCommand(name="remove-object", description="Remove an object from the domain.", example="remove-object julius --ou \"OU=Users,DC=conquest,DC=local\" --dc dc01.conquest.local",
                            message="Tasked agent to remove object.", mitre=["T1098"])
             .addArgString("object", "Object name or DN.", True)
             .addFlagString("--ou", "path", "OU path to search.")
@@ -1460,7 +1461,7 @@ cmd_removedelegation = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_removeattribute = (
-    conquest.createCommand(name="remove-attribute", description="Remove an attribute or attribute value.", example="remove-attribute julius description -value 'Old description' --dc dc01.conquest.local",
+    conquest.createCommand(name="remove-attribute", description="Remove an attribute or attribute value.", example="remove-attribute julius description --value 'Old description' --dc dc01.conquest.local",
                            message="Tasked agent to remove attribute.", mitre=["T1098"])
             .addArgString("target", "Object name or DN.", True)
             .addArgString("attribute", "Attribute name.", True)
@@ -1527,7 +1528,7 @@ cmd_removeuac = (
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 cmd_removeace = (
-    conquest.createCommand(name="remove-ace", description="Remove an ACE from an object's DACL.", example="remove-ace CN=SomeObject,DC=conquest,DC=local -trustee julius --dc dc01.conquest.local",
+    conquest.createCommand(name="remove-ace", description="Remove an ACE from an object's DACL.", example="remove-ace CN=SomeObject,DC=conquest,DC=local --trustee julius --dc dc01.conquest.local",
                            message="Tasked agent to remove ACE.", mitre=["T1222.001"])
             .addArgString("target", "Target object name or DN.", True)
             .addFlagString("--trustee", "trustee", "Trustee name or DN to match.")
