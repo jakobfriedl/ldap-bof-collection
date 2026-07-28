@@ -324,3 +324,16 @@ ldap get-users -ou "OU=Employees,DC=corp,DC=local"
 ## Disclaimer
 
 **FOR AUTHORIZED TESTING ONLY.** The author assumes no liability for misuse or damage caused by this toolkit. Always obtain proper authorization before conducting security assessments.
+
+# Conquest Compatibility
+
+- Added x86 support
+- Fixed duplicate imports
+- Updated calls to `BeaconPrintf` to always end in a `\n` for proper formatting with the following command.
+
+```bash
+find . -name '*.c' -print0 | xargs -0 perl -0777 -i -pe '
+s/(BeaconPrintf\s*\(\s*CALLBACK_(?:OUTPUT|ERROR)\s*,\s*")((?:[^"\\]|\\.)*?)("\s*[^;]*?\);)/
+  $2 =~ m{\\n$} ? "$1$2$3" : "$1$2\\n$3"
+/gsex'
+```

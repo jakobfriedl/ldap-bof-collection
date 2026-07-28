@@ -14,14 +14,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -42,7 +42,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query machine account quota");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query machine account quota\n");
         PrintLdapError("Query MAQ", result);
         MSVCRT$free(defaultNC);
         if (dcHostname) MSVCRT$free(dcHostname);
@@ -54,13 +54,13 @@ void go(char *args, int alen) {
     if (entry) {
         char** maqValues = WLDAP32$ldap_get_values(ld, entry, "ms-DS-MachineAccountQuota");
         if (maqValues && maqValues[0]) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Machine Account Quota (ms-DS-MachineAccountQuota): %s", maqValues[0]);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Machine Account Quota (ms-DS-MachineAccountQuota): %s\n", maqValues[0]);
             WLDAP32$ldap_value_free(maqValues);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Machine Account Quota attribute not found or not set");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Machine Account Quota attribute not found or not set\n");
         }
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No results returned");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No results returned\n");
     }
 
     WLDAP32$ldap_msgfree(searchResult);

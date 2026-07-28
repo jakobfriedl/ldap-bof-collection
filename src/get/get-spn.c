@@ -14,7 +14,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
 
@@ -22,7 +22,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
@@ -31,7 +31,7 @@ void go(char *args, int alen) {
     if (!isTargetDN) {
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -50,7 +50,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -73,7 +73,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query SPNs");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query SPNs\n");
         PrintLdapError("Query SPN", result);
         MSVCRT$free(targetDN);
         if (defaultNC) MSVCRT$free(defaultNC);
@@ -87,14 +87,14 @@ void go(char *args, int alen) {
         char** values = WLDAP32$ldap_get_values(ld, entry, "servicePrincipalName");
         if (values) {
             int spnCount = WLDAP32$ldap_count_values(values);
-            BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Service Principal Names (%d):", spnCount);
-            BeaconPrintf(CALLBACK_OUTPUT, "==================================");
+            BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Service Principal Names (%d):\n", spnCount);
+            BeaconPrintf(CALLBACK_OUTPUT, "==================================\n");
             for (int i = 0; values[i] != NULL; i++) {
-                BeaconPrintf(CALLBACK_OUTPUT, "%s", values[i]);
+                BeaconPrintf(CALLBACK_OUTPUT, "%s\n", values[i]);
             }
             WLDAP32$ldap_value_free(values);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] No SPNs configured for this object");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] No SPNs configured for this object\n");
         }
     }
 

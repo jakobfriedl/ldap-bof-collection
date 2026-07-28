@@ -45,7 +45,7 @@ void go(char *args, int alen) {
     char* accessMaskStr = NULL;
     
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
     
@@ -60,7 +60,7 @@ void go(char *args, int alen) {
         // Clear all RBCD configuration
     } else {
         if (!principalIdentifier || MSVCRT$strlen(principalIdentifier) == 0) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Principal identifier required when not using --clear-all");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Principal identifier required when not using --clear-all\n");
             return;
         }
         
@@ -76,7 +76,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
@@ -88,7 +88,7 @@ void go(char *args, int alen) {
     
     defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -106,8 +106,8 @@ void go(char *args, int alen) {
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve target DN");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve target DN\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Target '%s' not found\n", targetIdentifier);
             MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -128,22 +128,22 @@ void go(char *args, int alen) {
             principalDN = FindObjectDN(ld, principalIdentifier, searchBase);
             
             if (!principalDN) {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve principal DN");
-                BeaconPrintf(CALLBACK_ERROR, "[!] Principal '%s' not found", principalIdentifier);
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve principal DN\n");
+                BeaconPrintf(CALLBACK_ERROR, "[!] Principal '%s' not found\n", principalIdentifier);
                 if (targetDN) MSVCRT$free(targetDN);
                 MSVCRT$free(defaultNC);
                 if (dcHostname) MSVCRT$free(dcHostname);
                 CleanupLDAP(ld);
                 return;
             }
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Resolved principal DN: %s", principalDN);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Resolved principal DN: %s\n", principalDN);
         }
         
         // Get principal's objectSid
         pPrincipalSid = GetObjectSid(ld, principalDN);
         
         if (!pPrincipalSid) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve principal's objectSid");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve principal's objectSid\n");
             if (principalDN) MSVCRT$free(principalDN);
             if (targetDN) MSVCRT$free(targetDN);
             MSVCRT$free(defaultNC);
@@ -155,7 +155,7 @@ void go(char *args, int alen) {
         // Convert SID to string for matching
         principalSidStr = SidToString(pPrincipalSid);
         if (principalSidStr) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Principal SID: %s", principalSidStr);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Principal SID: %s\n", principalSidStr);
         }
     }
     
@@ -177,14 +177,14 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object\n");
         PrintLdapError("Search for RBCD attribute", result);
         goto cleanup;
     }
 
     entry = WLDAP32$ldap_first_entry(ld, searchResult);
     if (!entry) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Object not found");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Object not found\n");
         WLDAP32$ldap_msgfree(searchResult);
         goto cleanup;
     }
@@ -193,12 +193,12 @@ void go(char *args, int alen) {
     values = WLDAP32$ldap_get_values_len(ld, entry, "msDS-AllowedToActOnBehalfOfOtherIdentity");
     
     if (!values || !values[0]) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] No RBCD configuration found on target");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] No RBCD configuration found on target\n");
         WLDAP32$ldap_msgfree(searchResult);
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Found existing RBCD configuration (%d bytes)", values[0]->bv_len);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Found existing RBCD configuration (%d bytes)\n", values[0]->bv_len);
     
     // Allocate and copy
     currentRbcdBerval = (BERVAL*)MSVCRT$malloc(sizeof(BERVAL));
@@ -215,7 +215,7 @@ void go(char *args, int alen) {
     
     // If clearing all, just delete the attribute
     if (removeAllRbcd) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Clearing all RBCD configuration...");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Clearing all RBCD configuration...\n");
         
         LDAPModA rbcdMod;
         rbcdMod.mod_op = LDAP_MOD_DELETE;
@@ -227,10 +227,10 @@ void go(char *args, int alen) {
         result = WLDAP32$ldap_modify_s(ld, targetDN, mods);
         
         if (result == LDAP_SUCCESS) {
-            BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: All RBCD configuration removed!");
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] The msDS-AllowedToActOnBehalfOfOtherIdentity attribute has been deleted");
+            BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: All RBCD configuration removed!\n");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] The msDS-AllowedToActOnBehalfOfOtherIdentity attribute has been deleted\n");
         } else {
-            BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove RBCD configuration");
+            BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove RBCD configuration\n");
             PrintLdapError("Delete RBCD attribute", result);
         }
         
@@ -242,11 +242,11 @@ void go(char *args, int alen) {
     }
     
     // Parse the security descriptor to get current DACL
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsing current RBCD security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsing current RBCD security descriptor...\n");
     PSD_INFO sdInfo = ParseSecurityDescriptor((BYTE*)currentRbcdBerval->bv_val, currentRbcdBerval->bv_len);
     
     if (!sdInfo) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse security descriptor\n");
         if (currentRbcdBerval) {
             if (currentRbcdBerval->bv_val) MSVCRT$free(currentRbcdBerval->bv_val);
             MSVCRT$free(currentRbcdBerval);
@@ -254,13 +254,13 @@ void go(char *args, int alen) {
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Current RBCD DACL has %d ACE(s)", sdInfo->DaclAceCount);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Current RBCD DACL has %d ACE(s)\n", sdInfo->DaclAceCount);
     
     // Find ACEs to remove
     DWORD* acesToRemove = NULL;
     DWORD removeCount = 0;
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Searching for matching ACEs...");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Searching for matching ACEs...\n");
     
     // First pass: count matches
     for (DWORD i = 0; i < sdInfo->DaclAceCount; i++) {
@@ -270,7 +270,7 @@ void go(char *args, int alen) {
     }
     
     if (removeCount == 0) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] No matching ACEs found, Principal may not have RBCD configured on this target");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] No matching ACEs found, Principal may not have RBCD configured on this target\n");
         FreeSecurityDescriptorInfo(sdInfo);
         if (currentRbcdBerval) {
             if (currentRbcdBerval->bv_val) MSVCRT$free(currentRbcdBerval->bv_val);
@@ -279,12 +279,12 @@ void go(char *args, int alen) {
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Found %d matching ACE(s) to remove", removeCount);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Found %d matching ACE(s) to remove\n", removeCount);
     
     // Allocate array for indices
     acesToRemove = (DWORD*)MSVCRT$malloc(removeCount * sizeof(DWORD));
     if (!acesToRemove) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed\n");
         FreeSecurityDescriptorInfo(sdInfo);
         if (currentRbcdBerval) {
             if (currentRbcdBerval->bv_val) MSVCRT$free(currentRbcdBerval->bv_val);
@@ -298,12 +298,12 @@ void go(char *args, int alen) {
     for (DWORD i = 0; i < sdInfo->DaclAceCount; i++) {
         if (DoesRbcdAceMatch(&sdInfo->DaclAces[i], principalSidStr, accessMask)) {
             acesToRemove[idx++] = i;
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Will remove ACE at index %d:", i);
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Will remove ACE at index %d:\n", i);
             if (sdInfo->DaclAces[i].TrusteeSid) {
-                BeaconPrintf(CALLBACK_OUTPUT, "    SID: %s", sdInfo->DaclAces[i].TrusteeSid);
+                BeaconPrintf(CALLBACK_OUTPUT, "    SID: %s\n", sdInfo->DaclAces[i].TrusteeSid);
             }
             char* maskStr = GetAccessMaskString(sdInfo->DaclAces[i].Mask);
-            BeaconPrintf(CALLBACK_OUTPUT, "    Access: %s (0x%08x)", maskStr, sdInfo->DaclAces[i].Mask);
+            BeaconPrintf(CALLBACK_OUTPUT, "    Access: %s (0x%08x)\n", maskStr, sdInfo->DaclAces[i].Mask);
         }
     }
     
@@ -314,7 +314,7 @@ void go(char *args, int alen) {
     BOOL daclDefaulted = FALSE;
     
     if (!ADVAPI32$GetSecurityDescriptorDacl(pSD, &daclPresent, &pOldDacl, &daclDefaulted)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get DACL from security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get DACL from security descriptor\n");
         MSVCRT$free(acesToRemove);
         FreeSecurityDescriptorInfo(sdInfo);
         if (currentRbcdBerval) {
@@ -326,8 +326,8 @@ void go(char *args, int alen) {
     
     // Check if we're removing all ACEs
     if (removeCount == sdInfo->DaclAceCount) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Removing all ACEs would leave RBCD empty");
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Deleting entire RBCD attribute instead");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Removing all ACEs would leave RBCD empty\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Deleting entire RBCD attribute instead\n");
         
         LDAPModA rbcdMod;
         rbcdMod.mod_op = LDAP_MOD_DELETE;
@@ -339,10 +339,10 @@ void go(char *args, int alen) {
         result = WLDAP32$ldap_modify_s(ld, targetDN, mods);
         
         if (result == LDAP_SUCCESS) {
-            BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: All RBCD configuration removed!");
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed principal: %s", principalIdentifier);
+            BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: All RBCD configuration removed!\n");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed principal: %s\n", principalIdentifier);
         } else {
-            BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove RBCD configuration");
+            BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove RBCD configuration\n");
             PrintLdapError("Delete RBCD attribute", result);
         }
         
@@ -356,13 +356,13 @@ void go(char *args, int alen) {
     }
     
     // Create new DACL without the specified ACEs
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Creating new RBCD DACL without removed ACE(s)...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Creating new RBCD DACL without removed ACE(s)...\n");
     PACL pNewDacl = CreateNewDaclWithoutAces(pOldDacl, acesToRemove, removeCount);
     
     MSVCRT$free(acesToRemove);
     
     if (!pNewDacl) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create new DACL\n");
         FreeSecurityDescriptorInfo(sdInfo);
         if (currentRbcdBerval) {
             if (currentRbcdBerval->bv_val) MSVCRT$free(currentRbcdBerval->bv_val);
@@ -371,16 +371,16 @@ void go(char *args, int alen) {
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new RBCD DACL");
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new RBCD DACL\n");
     
     // Create new security descriptor with the new DACL
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Building new RBCD security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Building new RBCD security descriptor...\n");
     
     BYTE absoluteSDBuffer[SECURITY_DESCRIPTOR_MIN_LENGTH];
     PSECURITY_DESCRIPTOR pNewSD = (PSECURITY_DESCRIPTOR)absoluteSDBuffer;
     
     if (!ADVAPI32$InitializeSecurityDescriptor(pNewSD, SECURITY_DESCRIPTOR_REVISION)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new security descriptor\n");
         MSVCRT$free(pNewDacl);
         FreeSecurityDescriptorInfo(sdInfo);
         if (currentRbcdBerval) {
@@ -407,7 +407,7 @@ void go(char *args, int alen) {
     
     // Set the new DACL
     if (!ADVAPI32$SetSecurityDescriptorDacl(pNewSD, TRUE, pNewDacl, FALSE)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set new DACL in security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set new DACL in security descriptor\n");
         MSVCRT$free(pNewDacl);
         FreeSecurityDescriptorInfo(sdInfo);
         if (currentRbcdBerval) {
@@ -417,14 +417,14 @@ void go(char *args, int alen) {
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] New RBCD security descriptor built successfully");
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] New RBCD security descriptor built successfully\n");
     
     // Convert to self-relative format
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Converting to self-relative format...");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Converting to self-relative format...\n");
     BERVAL* newRbcdBerval = ConvertSecurityDescriptorToBerval(pNewSD);
     
     if (!newRbcdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to BERVAL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to BERVAL\n");
         MSVCRT$free(pNewDacl);
         FreeSecurityDescriptorInfo(sdInfo);
         if (currentRbcdBerval) {
@@ -434,10 +434,10 @@ void go(char *args, int alen) {
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Converted to self-relative format (%d bytes)", newRbcdBerval->bv_len);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Converted to self-relative format (%d bytes)\n", newRbcdBerval->bv_len);
     
     // Write back to LDAP
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Writing modified RBCD configuration to LDAP...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Writing modified RBCD configuration to LDAP...\n");
     
     struct berval* modValues[] = { newRbcdBerval, NULL };
     LDAPModA rbcdMod;
@@ -450,13 +450,13 @@ void go(char *args, int alen) {
     result = WLDAP32$ldap_modify_s(ld, targetDN, mods);
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: RBCD principal(s) removed successfully!");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed: %d ACE(s)", removeCount);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Remaining: %d ACE(s) (was %d)", 
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: RBCD principal(s) removed successfully!\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed: %d ACE(s)\n", removeCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Remaining: %d ACE(s) (was %d)\n", 
                     sdInfo->DaclAceCount - removeCount, sdInfo->DaclAceCount);
         
         // Verify
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Verifying changes...");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Verifying changes...\n");
         
         LDAPMessage* verifyResult = NULL;
         result = WLDAP32$ldap_search_s(ld, targetDN, LDAP_SCOPE_BASE, "(objectClass=*)", attrs, 0, &verifyResult);
@@ -468,13 +468,13 @@ void go(char *args, int alen) {
                 if (verifyValues && verifyValues[0]) {
                     PSD_INFO verifyInfo = ParseSecurityDescriptor((BYTE*)verifyValues[0]->bv_val, verifyValues[0]->bv_len);
                     if (verifyInfo) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "[+] Verification: RBCD DACL now has %d ACE(s)", verifyInfo->DaclAceCount);
+                        BeaconPrintf(CALLBACK_OUTPUT, "[+] Verification: RBCD DACL now has %d ACE(s)\n", verifyInfo->DaclAceCount);
                         
                         DWORD expectedCount = sdInfo->DaclAceCount - removeCount;
                         if (verifyInfo->DaclAceCount == expectedCount) {
-                            BeaconPrintf(CALLBACK_OUTPUT, "[+] ACE count matches expected value");
+                            BeaconPrintf(CALLBACK_OUTPUT, "[+] ACE count matches expected value\n");
                         } else {
-                            BeaconPrintf(CALLBACK_OUTPUT, "[!] Warning: ACE count mismatch (expected %d, got %d)", 
+                            BeaconPrintf(CALLBACK_OUTPUT, "[!] Warning: ACE count mismatch (expected %d, got %d)\n", 
                                         expectedCount, verifyInfo->DaclAceCount);
                         }
                         
@@ -486,7 +486,7 @@ void go(char *args, int alen) {
             WLDAP32$ldap_msgfree(verifyResult);
         }
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove RBCD principal(s)");
+        BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove RBCD principal(s)\n");
         PrintLdapError("Modify RBCD attribute", result);
     }
     

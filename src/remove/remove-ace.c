@@ -217,7 +217,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
     
@@ -229,7 +229,7 @@ void go(char *args, int alen) {
     GUID dcsyncGuid1, dcsyncGuid2;
     
     if (isDCSyncRemoval) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] DCSync removal detected");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] DCSync removal detected\n");
         
         // Parse the two DCSync GUIDs
         MSVCRT$memset(&dcsyncGuid1, 0, sizeof(GUID));
@@ -253,40 +253,40 @@ void go(char *args, int alen) {
     BYTE aceType = 0xFF; // Wildcard by default
     
     if (removeByIndex) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Mode: Remove by ACE Index: %d", aceIndex);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Mode: Remove by ACE Index: %d\n", aceIndex);
     } else {
         // Remove by matching
         if (!trusteeIdentifier || MSVCRT$strlen(trusteeIdentifier) == 0) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Trustee identifier required when not removing by index");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Trustee identifier required when not removing by index\n");
             if (guidsToMatch) MSVCRT$free(guidsToMatch);
             return;
         }
         
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Mode: Remove by matching trustee and permissions");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Mode: Remove by matching trustee and permissions\n");
         
         // Parse access mask and type (unless DCSync)
         if (!isDCSyncRemoval) {
             if (accessMaskStr && MSVCRT$strlen(accessMaskStr) > 0) {
                 accessMask = ParseAccessMask(accessMaskStr);
                 if (accessMask != 0) {
-                    BeaconPrintf(CALLBACK_OUTPUT, "[*] Access Mask: %s (0x%08x)", accessMaskStr, accessMask);
+                    BeaconPrintf(CALLBACK_OUTPUT, "[*] Access Mask: %s (0x%08x)\n", accessMaskStr, accessMask);
                 }
             }
             
             if (aceTypeStr && MSVCRT$strlen(aceTypeStr) > 0) {
                 aceType = ParseAceType(aceTypeStr);
-                BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE Type: %s (0x%02x)", aceTypeStr, aceType);
+                BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE Type: %s (0x%02x)\n", aceTypeStr, aceType);
             }
             
             if (accessMask == 0 && aceType == 0xFF) {
-                BeaconPrintf(CALLBACK_OUTPUT, "[*] Will remove ALL ACEs for this trustee");
+                BeaconPrintf(CALLBACK_OUTPUT, "[*] Will remove ALL ACEs for this trustee\n");
             }
         }
     }
     
     // Display optional parameters
     if (searchOu && MSVCRT$strlen(searchOu) > 0) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Search OU: %s", searchOu);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Search OU: %s\n", searchOu);
     }
     if (dcAddress && MSVCRT$strlen(dcAddress) > 0) {
     }
@@ -294,11 +294,11 @@ void go(char *args, int alen) {
     }
     
     // Initialize LDAP connection
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Initializing LDAP connection...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Initializing LDAP connection...\n");
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         if (guidsToMatch) MSVCRT$free(guidsToMatch);
         return;
     }
@@ -306,7 +306,7 @@ void go(char *args, int alen) {
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         if (guidsToMatch) MSVCRT$free(guidsToMatch);
         CleanupLDAP(ld);
@@ -333,7 +333,7 @@ void go(char *args, int alen) {
         targetDN = (char*)MSVCRT$malloc(len);
         if (targetDN) {
             MSVCRT$strcpy(targetDN, defaultNC);
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Using domain root: %s", targetDN);
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Using domain root: %s\n", targetDN);
         }
     } else if (isTargetDN) {
         size_t len = MSVCRT$strlen(targetIdentifier) + 1;
@@ -345,13 +345,13 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             goto cleanup;
         }
     }
     
     if (!targetDN) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve target DN");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve target DN\n");
         goto cleanup;
     }
     
@@ -368,46 +368,46 @@ void go(char *args, int alen) {
             char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
             trusteeDN = FindObjectDN(ld, trusteeIdentifier, searchBase);
             if (!trusteeDN) {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Trustee '%s' not found", trusteeIdentifier);
+                BeaconPrintf(CALLBACK_ERROR, "[-] Trustee '%s' not found\n", trusteeIdentifier);
                 goto cleanup;
             }
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Resolved trustee DN: %s", trusteeDN);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Resolved trustee DN: %s\n", trusteeDN);
         }
         
         // Get trustee's SID
         pTrusteeSid = GetObjectSid(ld, trusteeDN);
         if (!pTrusteeSid) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get trustee's objectSid");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get trustee's objectSid\n");
             goto cleanup;
         }
         
         trusteeSidStr = SidToString(pTrusteeSid);
         if (!trusteeSidStr) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert trustee SID to string");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert trustee SID to string\n");
             goto cleanup;
         }
         
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Trustee SID: %s", trusteeSidStr);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Trustee SID: %s\n", trusteeSidStr);
     }
     
     // Read current security descriptor
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Reading security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Reading security descriptor...\n");
     sdBerval = ReadSecurityDescriptor(ld, targetDN);
     if (!sdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor\n");
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Read security descriptor (%d bytes)", sdBerval->bv_len);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Read security descriptor (%d bytes)\n", sdBerval->bv_len);
     
     // Parse security descriptor
     sdInfo = ParseSecurityDescriptor((BYTE*)sdBerval->bv_val, sdBerval->bv_len);
     if (!sdInfo) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse security descriptor\n");
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Current DACL has %d ACE(s)", sdInfo->DaclAceCount);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Current DACL has %d ACE(s)\n", sdInfo->DaclAceCount);
     
     // Get target's SID for display
     pObjectSid = GetObjectSid(ld, targetDN);
@@ -421,26 +421,26 @@ void go(char *args, int alen) {
     if (removeByIndex) {
         // Remove by specific index
         if (aceIndex >= (int)sdInfo->DaclAceCount) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] ACE index %d out of range (max: %d)", 
+            BeaconPrintf(CALLBACK_ERROR, "[-] ACE index %d out of range (max: %d)\n", 
                         aceIndex, sdInfo->DaclAceCount - 1);
             goto cleanup;
         }
         
         acesToRemove = (DWORD*)MSVCRT$malloc(sizeof(DWORD));
         if (!acesToRemove) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed\n");
             goto cleanup;
         }
         
         acesToRemove[0] = aceIndex;
         removeCount = 1;
         
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Will remove ACE at index %d:", aceIndex);
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Will remove ACE at index %d:\n", aceIndex);
         PrintAceInfo(&sdInfo->DaclAces[aceIndex], aceIndex, targetDN, objectSidStr);
         
     } else {
         // Remove by matching - scan for all matching ACEs
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Scanning for matching ACEs...");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Scanning for matching ACEs...\n");
         
         // First pass: count matches
         for (DWORD i = 0; i < sdInfo->DaclAceCount; i++) {
@@ -451,16 +451,16 @@ void go(char *args, int alen) {
         }
         
         if (removeCount == 0) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] No matching ACEs found for this trustee");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] No matching ACEs found for this trustee\n");
             goto cleanup;
         }
         
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Found %d matching ACE(s) to remove", removeCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Found %d matching ACE(s) to remove\n", removeCount);
         
         // Allocate array for indices
         acesToRemove = (DWORD*)MSVCRT$malloc(removeCount * sizeof(DWORD));
         if (!acesToRemove) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Memory allocation failed\n");
             goto cleanup;
         }
         
@@ -470,7 +470,7 @@ void go(char *args, int alen) {
             if (DoesAceMatch(&sdInfo->DaclAces[i], trusteeSidStr, accessMask, aceType,
                            guidsToMatch, guidCount)) {
                 acesToRemove[idx++] = i;
-                BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Will remove ACE #%d:", i);
+                BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Will remove ACE #%d:\n", i);
                 PrintAceInfo(&sdInfo->DaclAces[i], i, targetDN, objectSidStr);
             }
         }
@@ -483,27 +483,27 @@ void go(char *args, int alen) {
     BOOL daclDefaulted = FALSE;
     
     if (!ADVAPI32$GetSecurityDescriptorDacl(pSD, &daclPresent, &pOldDacl, &daclDefaulted)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get DACL from security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get DACL from security descriptor\n");
         goto cleanup;
     }
     
     // Create new DACL without the specified ACEs
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Creating new DACL...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Creating new DACL...\n");
     pNewDacl = CreateNewDaclWithoutAces(pOldDacl, acesToRemove, removeCount);
     
     if (!pNewDacl) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create new DACL\n");
         goto cleanup;
     }
     
     // Build new security descriptor
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Building new security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Building new security descriptor...\n");
     
     BYTE absoluteSDBuffer[SECURITY_DESCRIPTOR_MIN_LENGTH];
     PSECURITY_DESCRIPTOR pNewSD = (PSECURITY_DESCRIPTOR)absoluteSDBuffer;
     
     if (!ADVAPI32$InitializeSecurityDescriptor(pNewSD, SECURITY_DESCRIPTOR_REVISION)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize security descriptor\n");
         goto cleanup;
     }
     
@@ -524,7 +524,7 @@ void go(char *args, int alen) {
     
     // Set the new DACL
     if (!ADVAPI32$SetSecurityDescriptorDacl(pNewSD, TRUE, pNewDacl, FALSE)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set DACL\n");
         goto cleanup;
     }
     
@@ -541,41 +541,41 @@ void go(char *args, int alen) {
     // Convert to self-relative format for LDAP
     newSdBerval = ConvertSecurityDescriptorToBerval(pNewSD);
     if (!newSdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor\n");
         goto cleanup;
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Security descriptor ready (%d bytes)", newSdBerval->bv_len);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Security descriptor ready (%d bytes)\n", newSdBerval->bv_len);
     
     // Write back to LDAP
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Writing modified security descriptor...");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Writing modified security descriptor...\n");
     BOOL writeSuccess = WriteSecurityDescriptor(ld, targetDN, newSdBerval);
     
     if (writeSuccess) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: ACE(s) removed successfully!");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed: %d ACE(s)", removeCount);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] New DACL: %d ACE(s) (was %d)", 
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] SUCCESS: ACE(s) removed successfully!\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed: %d ACE(s)\n", removeCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] New DACL: %d ACE(s) (was %d)\n", 
                     sdInfo->DaclAceCount - removeCount, sdInfo->DaclAceCount);
         
         if (isDCSyncRemoval) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] DCSync rights revoked");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] DCSync rights revoked\n");
         }
         
         // Verify
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Verifying changes...");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] Verifying changes...\n");
         BERVAL* verifyBerval = ReadSecurityDescriptor(ld, targetDN);
         if (verifyBerval) {
             PSD_INFO verifyInfo = ParseSecurityDescriptor((BYTE*)verifyBerval->bv_val, 
                                                           verifyBerval->bv_len);
             if (verifyInfo) {
                 DWORD expectedCount = sdInfo->DaclAceCount - removeCount;
-                BeaconPrintf(CALLBACK_OUTPUT, "[+] Verification: DACL has %d ACE(s) (expected %d)", 
+                BeaconPrintf(CALLBACK_OUTPUT, "[+] Verification: DACL has %d ACE(s) (expected %d)\n", 
                             verifyInfo->DaclAceCount, expectedCount);
                 
                 if (verifyInfo->DaclAceCount == expectedCount) {
-                    BeaconPrintf(CALLBACK_OUTPUT, "[+] ACE count matches - operation successful");
+                    BeaconPrintf(CALLBACK_OUTPUT, "[+] ACE count matches - operation successful\n");
                 } else {
-                    BeaconPrintf(CALLBACK_OUTPUT, "[!] Warning: ACE count mismatch");
+                    BeaconPrintf(CALLBACK_OUTPUT, "[!] Warning: ACE count mismatch\n");
                 }
                 
                 FreeSecurityDescriptorInfo(verifyInfo);
@@ -584,7 +584,7 @@ void go(char *args, int alen) {
             MSVCRT$free(verifyBerval);
         }
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove ACE(s)");
+        BeaconPrintf(CALLBACK_ERROR, "\n[-] FAILED to remove ACE(s)\n");
     }
 
 cleanup:

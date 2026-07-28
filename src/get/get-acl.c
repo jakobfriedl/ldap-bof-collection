@@ -16,7 +16,7 @@ void go(char *args, int alen) {
     int resolveNames = BeaconDataInt(&parser);
 
     if (!objectIdentifier || MSVCRT$strlen(objectIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Object identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Object identifier is required\n");
         return;
     }
 
@@ -24,14 +24,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -49,7 +49,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, objectIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", objectIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", objectIdentifier);
             MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -60,11 +60,11 @@ void go(char *args, int alen) {
     // Read security descriptor
     BERVAL* sdBerval = ReadSecurityDescriptor(ld, targetDN);
     if (!sdBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read security descriptor\n");
         goto cleanup;
     }
 
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Read security descriptor (%d bytes)", sdBerval->bv_len);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Read security descriptor (%d bytes)\n", sdBerval->bv_len);
 
     // Get object SID for display
     PSID pObjectSid = GetObjectSid(ld, targetDN);
@@ -76,7 +76,7 @@ void go(char *args, int alen) {
     // Parse security descriptor
     PSD_INFO sdInfo = ParseSecurityDescriptor((BYTE*)sdBerval->bv_val, sdBerval->bv_len);
     if (!sdInfo) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse security descriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse security descriptor\n");
         if (objectSidStr) MSVCRT$free(objectSidStr);
         if (pObjectSid) MSVCRT$free(pObjectSid);
         MSVCRT$free(sdBerval->bv_val);

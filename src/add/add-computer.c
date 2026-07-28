@@ -16,7 +16,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!computerIdentifier || MSVCRT$strlen(computerIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Computer name or DN is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Computer name or DN is required\n");
         return;
     }
     
@@ -27,14 +27,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
     // Get default naming context - will build from hostname if possible
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -150,7 +150,7 @@ void go(char *args, int alen) {
             password_mod.mod_type = "unicodePwd";
             password_mod.mod_vals.modv_bvals = password_bervals;
         } else {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Failed to encode password, continuing without password");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Failed to encode password, continuing without password\n");
         }
     }
     
@@ -171,29 +171,29 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_add_s(ld, computerDN, attrs);
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created computer '%s'", computername);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s", computerDN);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] sAMAccountName: %s", samAccountName);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] dnsHostName: %s", dnsHostName);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] SPNs: HOST/%s, HOST/%s, RestrictedKrbHost/%s, RestrictedKrbHost/%s", 
-                     computername, dnsHostName, computername, dnsHostName);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created computer '%s'\n", computername);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s\n", computerDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] sAMAccountName: %s\n", samAccountName);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] dnsHostName: %s\n", dnsHostName);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] SPNs: HOST/%s, HOST/%s, RestrictedKrbHost/%s, RestrictedKrbHost/%s\n", 
+computername, dnsHostName, computername, dnsHostName);
         if (encodedPassword) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Password: Set successfully");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Password set successfully: %s\n", password);
         }
         if (disabled) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Account Status: DISABLED");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Account Status: DISABLED\n");
         }
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create computer");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create computer\n");
         PrintLdapError("Add computer", result);
         if (result == LDAP_ALREADY_EXISTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Computer already exists");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Computer already exists\n");
         } else if (result == LDAP_INSUFFICIENT_RIGHTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions\n");
         } else if (result == LDAP_INVALID_DN_SYNTAX) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax\n");
         } else if (result == LDAP_NO_SUCH_OBJECT) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Target OU does not exist");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Target OU does not exist\n");
         }
     }
     

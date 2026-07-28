@@ -14,7 +14,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!userIdentifier || MSVCRT$strlen(userIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] User identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] User identifier is required\n");
         return;
     }
 
@@ -22,14 +22,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -47,13 +47,13 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         userDN = FindObjectDN(ld, userIdentifier, searchBase);
         if (!userDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] User '%s' not found", userIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] User '%s' not found\n", userIdentifier);
             MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
         }
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] User DN: %s", userDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] User DN: %s\n", userDN);
     }
 
     // Query the user's memberOf attribute
@@ -71,7 +71,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query user groups");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query user groups\n");
         PrintLdapError("Query memberOf", result);
         MSVCRT$free(userDN);
         MSVCRT$free(defaultNC);
@@ -85,15 +85,15 @@ void go(char *args, int alen) {
         char** memberOfValues = WLDAP32$ldap_get_values(ld, entry, "memberOf");
         if (memberOfValues) {
             int groupCount = WLDAP32$ldap_count_values(memberOfValues);
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] User is member of %d group(s):\n", groupCount);
-            BeaconPrintf(CALLBACK_OUTPUT, "Group DN");
-            BeaconPrintf(CALLBACK_OUTPUT, "========");
+            
+            BeaconPrintf(CALLBACK_OUTPUT, "Group DN\n");
+            BeaconPrintf(CALLBACK_OUTPUT, "========\n");
             for (int i = 0; memberOfValues[i] != NULL; i++) {
-                BeaconPrintf(CALLBACK_OUTPUT, "%s", memberOfValues[i]);
+                BeaconPrintf(CALLBACK_OUTPUT, "%s\n", memberOfValues[i]);
             }
             WLDAP32$ldap_value_free(memberOfValues);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] User is not a member of any groups (or only primary group)");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] User is not a member of any groups (or only primary group)\n");
         }
     }
 

@@ -14,7 +14,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!objectIdentifier || MSVCRT$strlen(objectIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Object identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Object identifier is required\n");
         return;
     }
 
@@ -22,14 +22,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -47,7 +47,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         objectDN = FindObjectDN(ld, objectIdentifier, searchBase);
         if (!objectDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Object '%s' not found", objectIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Object '%s' not found\n", objectIdentifier);
             MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -70,7 +70,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query object");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query object\n");
         PrintLdapError("Query object", result);
         MSVCRT$free(objectDN);
         MSVCRT$free(defaultNC);
@@ -81,7 +81,7 @@ void go(char *args, int alen) {
 
     LDAPMessage* entry = WLDAP32$ldap_first_entry(ld, searchResult);
     if (entry) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Object attributes:\n======================");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Object attributes:\n======================\n");
 
         // Iterate through all attributes
         BerElement* ber = NULL;
@@ -99,11 +99,11 @@ void go(char *args, int alen) {
                     char formatted[256];
                     if (MSVCRT$_stricmp(attribute, "objectGUID") == 0) {
                         FormatGUID((BYTE*)bvalues[0]->bv_val, formatted);
-                        BeaconPrintf(CALLBACK_OUTPUT, "%-30s : %s", attribute, formatted);
+                        BeaconPrintf(CALLBACK_OUTPUT, "%-30s : %s\n", attribute, formatted);
                     } else if (MSVCRT$_stricmp(attribute, "objectSid") == 0 || 
                                MSVCRT$_stricmp(attribute, "objectSID") == 0) {
                         FormatSID((BYTE*)bvalues[0]->bv_val, bvalues[0]->bv_len, formatted);
-                        BeaconPrintf(CALLBACK_OUTPUT, "%-30s : %s", attribute, formatted);
+                        BeaconPrintf(CALLBACK_OUTPUT, "%-30s : %s\n", attribute, formatted);
                     }
                 }
                 if (bvalues) WLDAP32$ldap_value_free_len(bvalues);
@@ -112,7 +112,7 @@ void go(char *args, int alen) {
                 char** values = WLDAP32$ldap_get_values(ld, entry, attribute);
                 if (values) {
                     for (int i = 0; values[i] != NULL; i++) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "%-30s : %s", attribute, values[i]);
+                        BeaconPrintf(CALLBACK_OUTPUT, "%-30s : %s\n", attribute, values[i]);
                     }
                     WLDAP32$ldap_value_free(values);
                 }

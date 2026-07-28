@@ -14,7 +14,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
@@ -48,7 +48,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query rootDSE");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query rootDSE\n");
         PrintLdapError("Query rootDSE", result);
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
@@ -57,14 +57,14 @@ void go(char *args, int alen) {
 
     LDAPMessage* entry = WLDAP32$ldap_first_entry(ld, searchResult);
     if (entry) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Domain Information:");
-        BeaconPrintf(CALLBACK_OUTPUT, "=======================");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Domain Information:\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "=======================\n");
 
         // Print each attribute
         for (int i = 0; attrs[i] != NULL; i++) {
             char** values = WLDAP32$ldap_get_values(ld, entry, attrs[i]);
             if (values && values[0]) {
-                BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %s", attrs[i], values[0]);
+                BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %s\n", attrs[i], values[0]);
                 WLDAP32$ldap_value_free(values);
             }
         }
@@ -76,8 +76,8 @@ void go(char *args, int alen) {
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (defaultNC) {
         // Count users, computers, groups
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Object Counts:");
-        BeaconPrintf(CALLBACK_OUTPUT, "==================");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Object Counts:\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "==================\n");
 
         // Count users
         LDAPMessage* countResult = NULL;
@@ -85,7 +85,7 @@ void go(char *args, int alen) {
             "(&(objectClass=user)(objectCategory=person))", NULL, 1, &countResult);
         if (result == LDAP_SUCCESS) {
             int count = WLDAP32$ldap_count_entries(ld, countResult);
-            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d", "Users", count);
+            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d\n", "Users", count);
             WLDAP32$ldap_msgfree(countResult);
         }
 
@@ -94,7 +94,7 @@ void go(char *args, int alen) {
             "(objectClass=computer)", NULL, 1, &countResult);
         if (result == LDAP_SUCCESS) {
             int count = WLDAP32$ldap_count_entries(ld, countResult);
-            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d", "Computers", count);
+            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d\n", "Computers", count);
             WLDAP32$ldap_msgfree(countResult);
         }
 
@@ -103,7 +103,7 @@ void go(char *args, int alen) {
             "(objectClass=group)", NULL, 1, &countResult);
         if (result == LDAP_SUCCESS) {
             int count = WLDAP32$ldap_count_entries(ld, countResult);
-            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d", "Groups", count);
+            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d\n", "Groups", count);
             WLDAP32$ldap_msgfree(countResult);
         }
 
@@ -112,7 +112,7 @@ void go(char *args, int alen) {
             "(objectClass=organizationalUnit)", NULL, 1, &countResult);
         if (result == LDAP_SUCCESS) {
             int count = WLDAP32$ldap_count_entries(ld, countResult);
-            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d", "Organizational Units", count);
+            BeaconPrintf(CALLBACK_OUTPUT, "%-35s : %d\n", "Organizational Units", count);
             WLDAP32$ldap_msgfree(countResult);
         }
 

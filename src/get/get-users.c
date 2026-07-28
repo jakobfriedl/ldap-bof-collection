@@ -16,14 +16,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -85,7 +85,7 @@ void go(char *args, int alen) {
     }
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for users");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for users\n");
         PrintLdapError("Search users", result);
         MSVCRT$free(defaultNC);
         if (dcHostname) MSVCRT$free(dcHostname);
@@ -94,11 +94,11 @@ void go(char *args, int alen) {
     }
 
     int userCount = WLDAP32$ldap_count_entries(ld, searchResult);
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Found %d user(s):\n", userCount);
+    
 
     LDAPMessage* entry = WLDAP32$ldap_first_entry(ld, searchResult);
     while (entry != NULL) {
-        BeaconPrintf(CALLBACK_OUTPUT, "===================================");
+        BeaconPrintf(CALLBACK_OUTPUT, "===================================\n");
         
         // Display all requested attributes
         for (int i = 0; i < attrCount; i++) {

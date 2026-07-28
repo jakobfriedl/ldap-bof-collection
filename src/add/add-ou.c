@@ -15,7 +15,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!ouIdentifier || MSVCRT$strlen(ouIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] OU name or DN is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] OU name or DN is required\n");
         return;
     }
     
@@ -23,14 +23,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
     // Get default naming context - will build from hostname if possible
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -77,7 +77,7 @@ void go(char *args, int alen) {
         }
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] OU name: %s", ouName);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] OU name: %s\n", ouName);
     
     // Prepare attributes for OU creation
     char* objectClass_values[] = { "top", "organizationalUnit", NULL };
@@ -110,50 +110,50 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_add_s(ld, ouDN, attrs);
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created OU!");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] OU Name: %s", ouName);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s", ouDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created OU!\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] OU Name: %s\n", ouName);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s\n", ouDN);
         
         if (description && MSVCRT$strlen(description) > 0) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Description: %s", description);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Description: %s\n", description);
         }
         
-        BeaconPrintf(CALLBACK_OUTPUT, "");
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] The OU can now be used to organize objects:");
-        BeaconPrintf(CALLBACK_OUTPUT, "[*]   ldap add-user username password -ou \"%s\"", ouDN);
-        BeaconPrintf(CALLBACK_OUTPUT, "[*]   ldap add-computer computername -ou \"%s\"", ouDN);
-        BeaconPrintf(CALLBACK_OUTPUT, "[*]   ldap move-object object \"%s\"", ouDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] The OU can now be used to organize objects:\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*]   ldap add-user username password -ou \"%s\"\n", ouDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*]   ldap add-computer computername -ou \"%s\"\n", ouDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*]   ldap move-object object \"%s\"\n", ouDN);
         
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create OU");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create OU\n");
         PrintLdapError("Create OU", result);
         
         if (result == LDAP_ALREADY_EXISTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] OU already exists at this location");
-            BeaconPrintf(CALLBACK_ERROR, "[!] DN: %s", ouDN);
+            BeaconPrintf(CALLBACK_ERROR, "[!] OU already exists at this location\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] DN: %s\n", ouDN);
         } else if (result == LDAP_INSUFFICIENT_RIGHTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to create OU");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Required permission: Create Organizational Unit objects");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to create OU\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Required permission: Create Organizational Unit objects\n");
         } else if (result == LDAP_INVALID_DN_SYNTAX) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax\n");
             if (parentOu && MSVCRT$strlen(parentOu) > 0) {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Check parent OU format: %s", parentOu);
+                BeaconPrintf(CALLBACK_ERROR, "[!] Check parent OU format: %s\n", parentOu);
             }
         } else if (result == LDAP_NO_SUCH_OBJECT) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Parent container does not exist");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Parent container does not exist\n");
             if (parentOu && MSVCRT$strlen(parentOu) > 0) {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Parent OU: %s", parentOu);
+                BeaconPrintf(CALLBACK_ERROR, "[!] Parent OU: %s\n", parentOu);
             } else {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Domain root: %s", defaultNC);
+                BeaconPrintf(CALLBACK_ERROR, "[!] Domain root: %s\n", defaultNC);
             }
         } else if (result == LDAP_CONSTRAINT_VIOLATION) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Constraint violation");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - OU name contains invalid characters");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Parent container doesn't accept OUs");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Constraint violation\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - OU name contains invalid characters\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Parent container doesn't accept OUs\n");
         } else if (result == LDAP_OBJECT_CLASS_VIOLATION) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Object class violation");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Parent container may not accept organizational units");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Object class violation\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Parent container may not accept organizational units\n");
         }
     }
     

@@ -17,12 +17,12 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!userIdentifier || MSVCRT$strlen(userIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] User identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] User identifier is required\n");
         return;
     }
     
     if (!newPassword || MSVCRT$strlen(newPassword) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] New password is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] New password is required\n");
         return;
     }
     
@@ -36,7 +36,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
@@ -46,7 +46,7 @@ void go(char *args, int alen) {
     if (!isUserDN) {
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             CleanupLDAP(ld);
             return;
         }
@@ -66,8 +66,8 @@ void go(char *args, int alen) {
         userDN = FindObjectDN(ld, userIdentifier, searchBase);
         
         if (!userDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve user DN");
-            BeaconPrintf(CALLBACK_ERROR, "[!] User '%s' not found", userIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve user DN\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] User '%s' not found\n", userIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             CleanupLDAP(ld);
             return;
@@ -81,7 +81,7 @@ void go(char *args, int alen) {
     if (!isAdminReset) {
         oldPasswordBerval = EncodePassword(oldPassword);
         if (!oldPasswordBerval) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to encode old password");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to encode old password\n");
             if (defaultNC) MSVCRT$free(defaultNC);
             MSVCRT$free(userDN);
             CleanupLDAP(ld);
@@ -91,7 +91,7 @@ void go(char *args, int alen) {
     
     newPasswordBerval = EncodePassword(newPassword);
     if (!newPasswordBerval) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to encode new password");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to encode new password\n");
         if (oldPasswordBerval) {
             MSVCRT$free(oldPasswordBerval->bv_val);
             MSVCRT$free(oldPasswordBerval);
@@ -136,30 +136,30 @@ void go(char *args, int alen) {
     }
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Password operation successful");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] User DN: %s", userDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Password operation successful\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] User DN: %s\n", userDN);
         if (isAdminReset) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Password reset by administrator");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Password reset by administrator\n");
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Password changed by user");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Password changed by user\n");
         }
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Password operation failed");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Password operation failed\n");
         PrintLdapError("Password modification", result);
         
         // Provide helpful hints
         if (result == LDAP_INSUFFICIENT_RIGHTS) {
             if (isAdminReset) {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions - admin rights required for password reset");
+                BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions - admin rights required for password reset\n");
             } else {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions or incorrect old password");
+                BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions or incorrect old password\n");
             }
         } else if (result == LDAP_NO_SUCH_OBJECT) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] User object does not exist");
+            BeaconPrintf(CALLBACK_ERROR, "[!] User object does not exist\n");
         } else if (result == LDAP_CONSTRAINT_VIOLATION) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] New password does not meet domain password policy requirements");
+            BeaconPrintf(CALLBACK_ERROR, "[!] New password does not meet domain password policy requirements\n");
         } else if (result == LDAP_INVALID_CREDENTIALS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid old password");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid old password\n");
         }
     }
     

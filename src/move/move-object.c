@@ -131,14 +131,14 @@ void go(char *args, int alen) {
     
     // Validate required parameters
     if (!sourceIdentifier || MSVCRT$strlen(sourceIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Source object identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Source object identifier is required\n");
         return;
     }
     
     // Must have at least one operation: move OR rename
     if ((!targetOU || MSVCRT$strlen(targetOU) == 0) && 
         (!newName || MSVCRT$strlen(newName) == 0)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Must specify target OU and/or new name");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Must specify target OU and/or new name\n");
         return;
     }
     
@@ -146,7 +146,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
@@ -158,7 +158,7 @@ void go(char *args, int alen) {
         
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -179,8 +179,8 @@ void go(char *args, int alen) {
         sourceDN = FindObjectDN(ld, sourceIdentifier, searchBase);
         
         if (!sourceDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve source DN");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Object '%s' not found", sourceIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve source DN\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Object '%s' not found\n", sourceIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             CleanupLDAP(ld);
             return;
@@ -192,7 +192,7 @@ void go(char *args, int alen) {
     char* currentParent = ExtractParentDN(sourceDN);
     
     if (!currentRDN) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse source DN");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to parse source DN\n");
         if (defaultNC) MSVCRT$free(defaultNC);
         if (sourceDN) MSVCRT$free(sourceDN);
         CleanupLDAP(ld);
@@ -270,8 +270,8 @@ void go(char *args, int alen) {
     }
     
     if (!isMove && !isRename) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[!] No changes detected - object already at target location with target name");
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Current DN: %s", sourceDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[!] No changes detected - object already at target location with target name\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Current DN: %s\n", sourceDN);
         goto cleanup;
     }
     
@@ -290,81 +290,81 @@ void go(char *args, int alen) {
     );
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Successfully completed operation!");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Old DN: %s", sourceDN);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] New DN: %s", expectedNewDN ? expectedNewDN : "(unable to construct)");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Successfully completed operation!\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Old DN: %s\n", sourceDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] New DN: %s\n", expectedNewDN ? expectedNewDN : "(unable to construct)");
         
         if (isMove && isRename) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Object moved and renamed successfully");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Object moved and renamed successfully\n");
             
             // Extract the CN value for display
             char* oldName = ExtractCNValue(currentRDN);
             char* newNameValue = ExtractCNValue(newRDN);
             if (oldName && newNameValue) {
-                BeaconPrintf(CALLBACK_OUTPUT, "[+]   Name: %s -> %s", oldName, newNameValue);
+                BeaconPrintf(CALLBACK_OUTPUT, "[+]   Name: %s -> %s\n", oldName, newNameValue);
             }
             if (oldName) MSVCRT$free(oldName);
             if (newNameValue) MSVCRT$free(newNameValue);
             
             if (currentParent && newParent) {
-                BeaconPrintf(CALLBACK_OUTPUT, "[+]   Location: %s -> %s", currentParent, newParent);
+                BeaconPrintf(CALLBACK_OUTPUT, "[+]   Location: %s -> %s\n", currentParent, newParent);
             }
         } else if (isMove) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Object moved successfully");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Object moved successfully\n");
             if (currentParent && newParent) {
-                BeaconPrintf(CALLBACK_OUTPUT, "[+]   From: %s", currentParent);
-                BeaconPrintf(CALLBACK_OUTPUT, "[+]   To:   %s", newParent);
+                BeaconPrintf(CALLBACK_OUTPUT, "[+]   From: %s\n", currentParent);
+                BeaconPrintf(CALLBACK_OUTPUT, "[+]   To:   %s\n", newParent);
             }
         } else if (isRename) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Object renamed successfully");
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Object renamed successfully\n");
             char* oldName = ExtractCNValue(currentRDN);
             char* newNameValue = ExtractCNValue(newRDN);
             if (oldName && newNameValue) {
-                BeaconPrintf(CALLBACK_OUTPUT, "[+]   Old name: %s", oldName);
-                BeaconPrintf(CALLBACK_OUTPUT, "[+]   New name: %s", newNameValue);
+                BeaconPrintf(CALLBACK_OUTPUT, "[+]   Old name: %s\n", oldName);
+                BeaconPrintf(CALLBACK_OUTPUT, "[+]   New name: %s\n", newNameValue);
             }
             if (oldName) MSVCRT$free(oldName);
             if (newNameValue) MSVCRT$free(newNameValue);
         }
         
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to move/rename object");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to move/rename object\n");
         PrintLdapError("Move/rename object", result);
-        BeaconPrintf(CALLBACK_OUTPUT, "");
+        BeaconPrintf(CALLBACK_OUTPUT, "\n");
         
         // Provide specific error guidance
         if (result == LDAP_NO_SUCH_OBJECT) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Target OU does not exist");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Target OU does not exist\n");
             if (newParent) {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Verify OU path: %s", newParent);
+                BeaconPrintf(CALLBACK_ERROR, "[!] Verify OU path: %s\n", newParent);
             }
         } else if (result == LDAP_ALREADY_EXISTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] An object with that name already exists in the target location");
+            BeaconPrintf(CALLBACK_ERROR, "[!] An object with that name already exists in the target location\n");
             if (expectedNewDN) {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Conflicting DN: %s", expectedNewDN);
+                BeaconPrintf(CALLBACK_ERROR, "[!] Conflicting DN: %s\n", expectedNewDN);
             }
         } else if (result == LDAP_INSUFFICIENT_RIGHTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to move/rename object");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Required permissions:");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Delete permission on source object");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Create child permission on target OU");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to move/rename object\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Required permissions:\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Delete permission on source object\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Create child permission on target OU\n");
         } else if (result == LDAP_INVALID_DN_SYNTAX) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax in target OU");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax in target OU\n");
             if (newParent) {
-                BeaconPrintf(CALLBACK_ERROR, "[!] Check DN format: %s", newParent);
+                BeaconPrintf(CALLBACK_ERROR, "[!] Check DN format: %s\n", newParent);
             }
         } else if (result == LDAP_OPERATIONS_ERROR) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Operation not permitted");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Trying to move critical system object");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Target OU has restrictions");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Object is part of infrastructure");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Operation not permitted\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Trying to move critical system object\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Target OU has restrictions\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Object is part of infrastructure\n");
         } else if (result == LDAP_CONSTRAINT_VIOLATION) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Constraint violation");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Object has child objects (can't move containers with children)");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Target OU doesn't accept this object type");
-            BeaconPrintf(CALLBACK_ERROR, "[!]   - Domain controller can't complete cross-domain move");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Constraint violation\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Possible causes:\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Object has child objects (can't move containers with children)\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Target OU doesn't accept this object type\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!]   - Domain controller can't complete cross-domain move\n");
         }
     }
     

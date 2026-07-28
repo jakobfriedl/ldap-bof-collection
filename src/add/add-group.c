@@ -44,27 +44,27 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!groupIdentifier || MSVCRT$strlen(groupIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Group name or DN is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Group name or DN is required\n");
         return;
     }
     
     int groupType = GetGroupType(type, scope);
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Group identifier: %s %s", groupIdentifier, isGroupDN ? "(DN)" : "(name)");
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Group Type: %d", groupType);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Group identifier: %s %s\n", groupIdentifier, isGroupDN ? "(DN)" : "(name)");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Group Type: %d\n", groupType);
     
     // Initialize LDAP connection
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
     // Get default naming context - will build from hostname if possible
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -111,7 +111,7 @@ void go(char *args, int alen) {
         }
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] sAMAccountName: %s", groupname);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] sAMAccountName: %s\n", groupname);
     
     // Convert group type to string
     char groupTypeStr[20];
@@ -152,9 +152,9 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_add_s(ld, groupDN, attrs);
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created group '%s'", groupname);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s", groupDN);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] sAMAccountName: %s", groupname);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created group '%s'\n", groupname);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s\n", groupDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] sAMAccountName: %s\n", groupname);
         
         // Print group type details
         const char* typeDesc = "Unknown";
@@ -178,22 +178,22 @@ void go(char *args, int alen) {
                 typeDesc = "Distribution - Universal";
                 break;
         }
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group Type: %s (%d)", typeDesc, groupType);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group Type: %s (%d)\n", typeDesc, groupType);
         
         if (description && MSVCRT$strlen(description) > 0) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Description: %s", description);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Description: %s\n", description);
         }
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create group");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to create group\n");
         PrintLdapError("Add group", result);
         if (result == LDAP_ALREADY_EXISTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Group already exists");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Group already exists\n");
         } else if (result == LDAP_INSUFFICIENT_RIGHTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions\n");
         } else if (result == LDAP_INVALID_DN_SYNTAX) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax\n");
         } else if (result == LDAP_NO_SUCH_OBJECT) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Target OU does not exist");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Target OU does not exist\n");
         }
     }
     

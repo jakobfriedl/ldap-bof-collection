@@ -57,14 +57,14 @@ BERVAL* ReadSecurityDescriptor(LDAP* ld, const char* objectDN) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object\n");
         PrintLdapError("Search for ntSecurityDescriptor", result);
         return NULL;
     }
 
     entry = WLDAP32$ldap_first_entry(ld, searchResult);
     if (!entry) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Object not found");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Object not found\n");
         WLDAP32$ldap_msgfree(searchResult);
         return NULL;
     }
@@ -72,7 +72,7 @@ BERVAL* ReadSecurityDescriptor(LDAP* ld, const char* objectDN) {
     // Get the binary ntSecurityDescriptor value
     values = WLDAP32$ldap_get_values_len(ld, entry, "ntSecurityDescriptor");
     if (!values || !values[0]) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve ntSecurityDescriptor attribute");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve ntSecurityDescriptor attribute\n");
         WLDAP32$ldap_msgfree(searchResult);
         return NULL;
     }
@@ -111,10 +111,10 @@ BOOL WriteSecurityDescriptor(LDAP* ld, const char* objectDN, BERVAL* sdBerval) {
     ULONG result = WLDAP32$ldap_modify_s(ld, (char*)objectDN, mods);
 
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully updated ntSecurityDescriptor");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully updated ntSecurityDescriptor\n");
         return TRUE;
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to update ntSecurityDescriptor");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to update ntSecurityDescriptor\n");
         PrintLdapError("Update ntSecurityDescriptor", result);
         return FALSE;
     }
@@ -134,7 +134,7 @@ PSD_INFO ParseSecurityDescriptor(BYTE* sdBuffer, DWORD sdLength) {
     SECURITY_DESCRIPTOR_CONTROL control = 0;
     DWORD revision = 0;
     if (!ADVAPI32$GetSecurityDescriptorControl(pSD, &control, &revision)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get security descriptor control");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get security descriptor control\n");
         MSVCRT$free(sdInfo);
         return NULL;
     }
@@ -965,14 +965,14 @@ PSID GetObjectSid(LDAP* ld, const char* objectDN) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object\n");
         PrintLdapError("Search for objectSid", result);
         return NULL;
     }
 
     entry = WLDAP32$ldap_first_entry(ld, searchResult);
     if (!entry) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Object not found");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Object not found\n");
         WLDAP32$ldap_msgfree(searchResult);
         return NULL;
     }
@@ -980,7 +980,7 @@ PSID GetObjectSid(LDAP* ld, const char* objectDN) {
     // Get the binary objectSid value
     values = WLDAP32$ldap_get_values_len(ld, entry, "objectSid");
     if (!values || !values[0]) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve objectSid attribute");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve objectSid attribute\n");
         WLDAP32$ldap_msgfree(searchResult);
         return NULL;
     }
@@ -1140,41 +1140,41 @@ char* GetGuidFriendlyName(GUID* guid) {
 void PrintSecurityDescriptorInfo(PSD_INFO sdInfo, const char* objectDN, const char* objectSid) {
     if (!sdInfo) return;
 
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Security Descriptor Information:\n=====================================");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Security Descriptor Information:\n=====================================\n");
     
     // Owner
     if (sdInfo->OwnerSid) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Owner: %s", sdInfo->OwnerSid);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Owner: %s\n", sdInfo->OwnerSid);
         if (sdInfo->OwnerName) {
-            BeaconPrintf(CALLBACK_OUTPUT, "    Name: %s", sdInfo->OwnerName);
+            BeaconPrintf(CALLBACK_OUTPUT, "    Name: %s\n", sdInfo->OwnerName);
         }
     }
     
     // Group
     if (sdInfo->GroupSid) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Group: %s", sdInfo->GroupSid);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Group: %s\n", sdInfo->GroupSid);
         if (sdInfo->GroupName) {
-            BeaconPrintf(CALLBACK_OUTPUT, "    Name: %s", sdInfo->GroupName);
+            BeaconPrintf(CALLBACK_OUTPUT, "    Name: %s\n", sdInfo->GroupName);
         }
     }
     
     // Control flags
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Control Flags: 0x%04x", sdInfo->ControlFlags);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Control Flags: 0x%04x\n", sdInfo->ControlFlags);
     if (sdInfo->ControlFlags & SE_DACL_PROTECTED) {
-        BeaconPrintf(CALLBACK_OUTPUT, "    - DACL is protected (inheritance blocked)");
+        BeaconPrintf(CALLBACK_OUTPUT, "    - DACL is protected (inheritance blocked)\n");
     }
     if (sdInfo->ControlFlags & SE_SACL_PROTECTED) {
-        BeaconPrintf(CALLBACK_OUTPUT, "    - SACL is protected");
+        BeaconPrintf(CALLBACK_OUTPUT, "    - SACL is protected\n");
     }
     
     // DACL
-    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] DACL (Discretionary Access Control List):");
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] DACL (Discretionary Access Control List):\n");
     if (!sdInfo->HasDacl) {
-        BeaconPrintf(CALLBACK_OUTPUT, "    No DACL present (NULL DACL - everyone has full access!)");
+        BeaconPrintf(CALLBACK_OUTPUT, "    No DACL present (NULL DACL - everyone has full access!)\n");
     } else if (sdInfo->DaclAceCount == 0) {
-        BeaconPrintf(CALLBACK_OUTPUT, "    Empty DACL (no one has access)");
+        BeaconPrintf(CALLBACK_OUTPUT, "    Empty DACL (no one has access)\n");
     } else {
-        BeaconPrintf(CALLBACK_OUTPUT, "    %d ACE(s):", sdInfo->DaclAceCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "    %d ACE(s):\n", sdInfo->DaclAceCount);
         for (DWORD i = 0; i < sdInfo->DaclAceCount; i++) {
             PrintAceInfo(&sdInfo->DaclAces[i], i, objectDN, objectSid);
         }
@@ -1182,14 +1182,14 @@ void PrintSecurityDescriptorInfo(PSD_INFO sdInfo, const char* objectDN, const ch
     
     // SACL (if present)
     if (sdInfo->HasSacl && sdInfo->SaclAceCount > 0) {
-        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] SACL (System Access Control List):");
-        BeaconPrintf(CALLBACK_OUTPUT, "    %d ACE(s):", sdInfo->SaclAceCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] SACL (System Access Control List):\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "    %d ACE(s):\n", sdInfo->SaclAceCount);
         for (DWORD i = 0; i < sdInfo->SaclAceCount; i++) {
             PrintAceInfo(&sdInfo->SaclAces[i], i, objectDN, objectSid);
         }
     }
     
-    BeaconPrintf(CALLBACK_OUTPUT, "=====================================\n");
+    
 }
 
 // Print individual ACE information (PowerView format)
@@ -1197,65 +1197,65 @@ void PrintAceInfo(PPARSED_ACE_INFO aceInfo, int index, const char* objectDN, con
     if (!aceInfo) return;
 
     // Print ACE number header
-    BeaconPrintf(CALLBACK_OUTPUT, "\n    ACE #%d:", index);
+    BeaconPrintf(CALLBACK_OUTPUT, "\n    ACE #%d:\n", index);
     
     // ObjectDN
     if (objectDN) {
-        BeaconPrintf(CALLBACK_OUTPUT, "      ObjectDN                : %s", objectDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "      ObjectDN                : %s\n", objectDN);
     }
     
     // ObjectSID
     if (objectSid) {
-        BeaconPrintf(CALLBACK_OUTPUT, "      ObjectSID               : %s", objectSid);
+        BeaconPrintf(CALLBACK_OUTPUT, "      ObjectSID               : %s\n", objectSid);
     }
     
     // ACEType
     char* aceTypeStr = GetAceTypeString(aceInfo->AceType);
     if (aceInfo->IsObjectAce) {
         if (aceInfo->AceType == ACCESS_ALLOWED_OBJECT_ACE_TYPE) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_ALLOWED_OBJECT_ACE");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_ALLOWED_OBJECT_ACE\n");
         } else if (aceInfo->AceType == ACCESS_DENIED_OBJECT_ACE_TYPE) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_DENIED_OBJECT_ACE");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_DENIED_OBJECT_ACE\n");
         } else if (aceInfo->AceType == SYSTEM_AUDIT_OBJECT_ACE_TYPE) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : SYSTEM_AUDIT_OBJECT_ACE");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : SYSTEM_AUDIT_OBJECT_ACE\n");
         }
     } else {
         if (aceInfo->AceType == ACCESS_ALLOWED_ACE_TYPE) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_ALLOWED_ACE");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_ALLOWED_ACE\n");
         } else if (aceInfo->AceType == ACCESS_DENIED_ACE_TYPE) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_DENIED_ACE");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : ACCESS_DENIED_ACE\n");
         } else if (aceInfo->AceType == SYSTEM_AUDIT_ACE_TYPE) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : SYSTEM_AUDIT_ACE");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ACEType                 : SYSTEM_AUDIT_ACE\n");
         }
     }
     
     // ACEFlags
     char* aceFlagsStr = GetAceFlagsString(aceInfo->AceFlags);
-    BeaconPrintf(CALLBACK_OUTPUT, "      ACEFlags                : %s", aceFlagsStr);
+    BeaconPrintf(CALLBACK_OUTPUT, "      ACEFlags                : %s\n", aceFlagsStr);
     
     // ActiveDirectoryRights (friendly name for access mask)
     char* accessMaskStr = GetAccessMaskString(aceInfo->Mask);
-    BeaconPrintf(CALLBACK_OUTPUT, "      ActiveDirectoryRights   : %s", accessMaskStr);
+    BeaconPrintf(CALLBACK_OUTPUT, "      ActiveDirectoryRights   : %s\n", accessMaskStr);
     
     // AccessMask (same as ActiveDirectoryRights for consistency)
-    BeaconPrintf(CALLBACK_OUTPUT, "      AccessMask              : %s", accessMaskStr);
+    BeaconPrintf(CALLBACK_OUTPUT, "      AccessMask              : %s\n", accessMaskStr);
     
     // ObjectAceFlags and ObjectAceType for object ACEs
     if (aceInfo->IsObjectAce) {
         // Print ObjectAceFlags once with all applicable flags
         if (aceInfo->HasObjectType && aceInfo->HasInheritedObjectType) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceFlags          : ACE_OBJECT_TYPE_PRESENT, ACE_INHERITED_OBJECT_TYPE_PRESENT");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceFlags          : ACE_OBJECT_TYPE_PRESENT, ACE_INHERITED_OBJECT_TYPE_PRESENT\n");
         } else if (aceInfo->HasObjectType) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceFlags          : ACE_OBJECT_TYPE_PRESENT");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceFlags          : ACE_OBJECT_TYPE_PRESENT\n");
         } else if (aceInfo->HasInheritedObjectType) {
-            BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceFlags          : ACE_INHERITED_OBJECT_TYPE_PRESENT");
+            BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceFlags          : ACE_INHERITED_OBJECT_TYPE_PRESENT\n");
         }
         
         // Print ObjectAceType if present
         if (aceInfo->HasObjectType) {
             char* guidName = GetGuidFriendlyName(&aceInfo->ObjectType);
             if (guidName) {
-                BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceType           : %s", guidName);
+                BeaconPrintf(CALLBACK_OUTPUT, "      ObjectAceType           : %s\n", guidName);
                 MSVCRT$free(guidName);
             }
         }
@@ -1264,7 +1264,7 @@ void PrintAceInfo(PPARSED_ACE_INFO aceInfo, int index, const char* objectDN, con
         if (aceInfo->HasInheritedObjectType) {
             char* inheritGuidName = GetGuidFriendlyName(&aceInfo->InheritedObjectType);
             if (inheritGuidName) {
-                BeaconPrintf(CALLBACK_OUTPUT, "      InheritedObjectType     : %s", inheritGuidName);
+                BeaconPrintf(CALLBACK_OUTPUT, "      InheritedObjectType     : %s\n", inheritGuidName);
                 MSVCRT$free(inheritGuidName);
             }
         }
@@ -1272,13 +1272,13 @@ void PrintAceInfo(PPARSED_ACE_INFO aceInfo, int index, const char* objectDN, con
     
     // InheritanceType (based on ACE flags)
     char* inheritanceType = GetInheritanceTypeString(aceInfo->AceFlags);
-    BeaconPrintf(CALLBACK_OUTPUT, "      InheritanceType         : %s", inheritanceType);
+    BeaconPrintf(CALLBACK_OUTPUT, "      InheritanceType         : %s\n", inheritanceType);
     
     // SecurityIdentifier (trustee SID or name)
     if (aceInfo->TrusteeName) {
-        BeaconPrintf(CALLBACK_OUTPUT, "      SecurityIdentifier      : %s", aceInfo->TrusteeName);
+        BeaconPrintf(CALLBACK_OUTPUT, "      SecurityIdentifier      : %s\n", aceInfo->TrusteeName);
     } else if (aceInfo->TrusteeSid) {
-        BeaconPrintf(CALLBACK_OUTPUT, "      SecurityIdentifier      : %s", aceInfo->TrusteeSid);
+        BeaconPrintf(CALLBACK_OUTPUT, "      SecurityIdentifier      : %s\n", aceInfo->TrusteeSid);
     }
 }
 
@@ -1320,7 +1320,7 @@ BOOL IsDCSyncKeyword(const char* str) {
 PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask, 
                           BYTE aceType, BYTE aceFlags, GUID* objectTypeGuid, GUID* inheritedObjectTypeGuid) {
     if (!trusteeSid || !ADVAPI32$IsValidSid(trusteeSid)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Invalid trustee SID provided");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Invalid trustee SID provided\n");
         return NULL;
     }
 
@@ -1331,13 +1331,13 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
     if (oldDacl) {
         ACL_SIZE_INFORMATION aclSizeInfo;
         if (!ADVAPI32$GetAclInformation(oldDacl, &aclSizeInfo, sizeof(aclSizeInfo), AclSizeInformation)) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACL information");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACL information\n");
             return NULL;
         }
         oldAceCount = aclSizeInfo.AceCount;
         oldAclSize = aclSizeInfo.AclBytesInUse;
         
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Old DACL: %d ACEs, %d bytes used", oldAceCount, oldAclSize);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Old DACL: %d ACEs, %d bytes used\n", oldAceCount, oldAclSize);
     }
 
     // Determine if we're creating an object ACE or standard ACE
@@ -1360,20 +1360,20 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
         newAceSize = sizeof(ACE_HEADER) + sizeof(ACCESS_MASK) + sidLength;
     }
 
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] New ACE size: %d bytes (type: %s)", 
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] New ACE size: %d bytes (type: %s)\n", 
                 newAceSize, isObjectAce ? "Object" : "Standard");
 
     // Calculate new DACL size with generous padding
     // We need: old DACL size + new ACE + extra space for alignment and safety
     DWORD newAclSize = oldAclSize + newAceSize + 256; // Increased padding for safety
     
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Allocating new DACL: %d bytes (old: %d + new ACE: %d + padding: 256)", 
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Allocating new DACL: %d bytes (old: %d + new ACE: %d + padding: 256)\n", 
                 newAclSize, oldAclSize, newAceSize);
     
     // Allocate new DACL
     PACL newDacl = (PACL)MSVCRT$malloc(newAclSize);
     if (!newDacl) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for new DACL\n");
         return NULL;
     }
 
@@ -1402,7 +1402,7 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
 
     // Initialize new DACL with appropriate revision
     if (!ADVAPI32$InitializeAcl(newDacl, newAclSize, aclRevision)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new DACL\n");
         MSVCRT$free(newDacl);
         return NULL;
     }
@@ -1414,7 +1414,7 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
         // Manually construct object ACE
         BYTE* aceBuffer = (BYTE*)MSVCRT$malloc(newAceSize);
         if (!aceBuffer) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate ACE buffer");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate ACE buffer\n");
             MSVCRT$free(newDacl);
             return NULL;
         }
@@ -1453,7 +1453,7 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
         MSVCRT$free(aceBuffer);
 
         if (!aceAdded) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add object ACE to DACL");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add object ACE to DACL\n");
         }
     } else {
         // Standard ACE - use helper function (use detected revision)
@@ -1464,7 +1464,7 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
         }
 
         if (!aceAdded) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add standard ACE to DACL");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add standard ACE to DACL\n");
         }
     }
 
@@ -1477,7 +1477,7 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
     // This is the key fix: instead of using AddAce() which fails for complex object ACEs,
     // we manually append the ACE data to the DACL buffer
     if (oldDacl && oldAceCount > 0) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Copying %d existing ACEs...", oldAceCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Copying %d existing ACEs...\n", oldAceCount);
         
         DWORD successCount = 0;
         DWORD failCount = 0;
@@ -1489,26 +1489,26 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
                 if (ADVAPI32$AddAce(newDacl, aclRevision, MAXDWORD, pAce, pAce->AceSize)) {
                     successCount++;
                 } else {
-                    BeaconPrintf(CALLBACK_ERROR, "[-] Failed to copy ACE #%d (Type: %d, Size: %d)", 
+                    BeaconPrintf(CALLBACK_ERROR, "[-] Failed to copy ACE #%d (Type: %d, Size: %d)\n", 
                                 i, pAce->AceType, pAce->AceSize);
                     failCount++;
                 }
             } else {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve ACE #%d", i);
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to retrieve ACE #%d\n", i);
                 failCount++;
             }
         }
         
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE copy results: %d successful, %d failed", successCount, failCount);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] ACE copy results: %d successful, %d failed\n", successCount, failCount);
     }
 
     // Verify the final ACE count
     ACL_SIZE_INFORMATION finalAclInfo;
     if (ADVAPI32$GetAclInformation(newDacl, &finalAclInfo, sizeof(finalAclInfo), AclSizeInformation)) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new DACL with %d ACE(s) (1 new + %d copied)", 
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new DACL with %d ACE(s) (1 new + %d copied)\n", 
                     finalAclInfo.AceCount, finalAclInfo.AceCount - 1);
     } else {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new DACL");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new DACL\n");
     }
     
     return newDacl;
@@ -1517,25 +1517,25 @@ PACL CreateNewDaclWithAce(PACL oldDacl, PSID trusteeSid, ACCESS_MASK accessMask,
 // Create a new DACL without a specific ACE (by index)
 PACL CreateNewDaclWithoutAce(PACL oldDacl, DWORD aceIndexToRemove) {
     if (!oldDacl) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No DACL provided");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No DACL provided\n");
         return NULL;
     }
 
     ACL_SIZE_INFORMATION aclSizeInfo;
     if (!ADVAPI32$GetAclInformation(oldDacl, &aclSizeInfo, sizeof(aclSizeInfo), AclSizeInformation)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACL information");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACL information\n");
         return NULL;
     }
 
     if (aceIndexToRemove >= aclSizeInfo.AceCount) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] ACE index %d out of range (max: %d)", aceIndexToRemove, aclSizeInfo.AceCount - 1);
+        BeaconPrintf(CALLBACK_ERROR, "[-] ACE index %d out of range (max: %d)\n", aceIndexToRemove, aclSizeInfo.AceCount - 1);
         return NULL;
     }
 
     // Get the size of the ACE we're removing
     PACE_HEADER pAceToRemove = NULL;
     if (!ADVAPI32$GetAce(oldDacl, aceIndexToRemove, (LPVOID*)&pAceToRemove)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACE to remove");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACE to remove\n");
         return NULL;
     }
 
@@ -1545,13 +1545,13 @@ PACL CreateNewDaclWithoutAce(PACL oldDacl, DWORD aceIndexToRemove) {
     // Allocate new DACL
     PACL newDacl = (PACL)MSVCRT$malloc(newAclSize);
     if (!newDacl) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for new DACL\n");
         return NULL;
     }
 
     // Initialize new DACL
     if (!ADVAPI32$InitializeAcl(newDacl, newAclSize, ACL_REVISION)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new DACL\n");
         MSVCRT$free(newDacl);
         return NULL;
     }
@@ -1565,40 +1565,40 @@ PACL CreateNewDaclWithoutAce(PACL oldDacl, DWORD aceIndexToRemove) {
         PACE_HEADER pAce = NULL;
         if (ADVAPI32$GetAce(oldDacl, i, (LPVOID*)&pAce)) {
             if (!ADVAPI32$AddAce(newDacl, ACL_REVISION, MAXDWORD, pAce, pAce->AceSize)) {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to copy ACE #%d", i);
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to copy ACE #%d\n", i);
                 MSVCRT$free(newDacl);
                 return NULL;
             }
         }
     }
 
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new DACL with ACE #%d removed", aceIndexToRemove);
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] New DACL has %d ACE(s)", aclSizeInfo.AceCount - 1);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully created new DACL with ACE #%d removed\n", aceIndexToRemove);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] New DACL has %d ACE(s)\n", aclSizeInfo.AceCount - 1);
     return newDacl;
 }
 
 // Create a new DACL without multiple specific ACEs (by indices)
 PACL CreateNewDaclWithoutAces(PACL oldDacl, DWORD* aceIndicesToRemove, DWORD removeCount) {
     if (!oldDacl) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No DACL provided");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No DACL provided\n");
         return NULL;
     }
     
     if (!aceIndicesToRemove || removeCount == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No ACE indices provided");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No ACE indices provided\n");
         return NULL;
     }
 
     ACL_SIZE_INFORMATION aclSizeInfo;
     if (!ADVAPI32$GetAclInformation(oldDacl, &aclSizeInfo, sizeof(aclSizeInfo), AclSizeInformation)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACL information");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get ACL information\n");
         return NULL;
     }
 
     // Validate all indices
     for (DWORD i = 0; i < removeCount; i++) {
         if (aceIndicesToRemove[i] >= aclSizeInfo.AceCount) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] ACE index %d out of range (max: %d)", 
+            BeaconPrintf(CALLBACK_ERROR, "[-] ACE index %d out of range (max: %d)\n", 
                         aceIndicesToRemove[i], aclSizeInfo.AceCount - 1);
             return NULL;
         }
@@ -1619,7 +1619,7 @@ PACL CreateNewDaclWithoutAces(PACL oldDacl, DWORD* aceIndicesToRemove, DWORD rem
     // Allocate new DACL
     PACL newDacl = (PACL)MSVCRT$malloc(newAclSize);
     if (!newDacl) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for new DACL\n");
         return NULL;
     }
 
@@ -1641,7 +1641,7 @@ PACL CreateNewDaclWithoutAces(PACL oldDacl, DWORD* aceIndicesToRemove, DWORD rem
 
     // Initialize new DACL with appropriate revision
     if (!ADVAPI32$InitializeAcl(newDacl, newAclSize, aclRevision)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new DACL");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize new DACL\n");
         MSVCRT$free(newDacl);
         return NULL;
     }
@@ -1665,7 +1665,7 @@ PACL CreateNewDaclWithoutAces(PACL oldDacl, DWORD* aceIndicesToRemove, DWORD rem
         PACE_HEADER pAce = NULL;
         if (ADVAPI32$GetAce(oldDacl, i, (LPVOID*)&pAce)) {
             if (!ADVAPI32$AddAce(newDacl, aclRevision, MAXDWORD, pAce, pAce->AceSize)) {
-                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to copy ACE #%d", i);
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to copy ACE #%d\n", i);
                 MSVCRT$free(newDacl);
                 return NULL;
             }
@@ -1673,7 +1673,7 @@ PACL CreateNewDaclWithoutAces(PACL oldDacl, DWORD* aceIndicesToRemove, DWORD rem
         }
     }
 
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed %d ACE(s), kept %d ACE(s)", removeCount, copiedCount);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Removed %d ACE(s), kept %d ACE(s)\n", removeCount, copiedCount);
     return newDacl;
 }
 
@@ -1687,20 +1687,20 @@ BERVAL* ConvertSecurityDescriptorToBerval(PSECURITY_DESCRIPTOR pSD) {
     ADVAPI32$MakeSelfRelativeSD(pSD, NULL, &sdSize);
     
     if (sdSize == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get security descriptor size");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get security descriptor size\n");
         return NULL;
     }
 
     // Allocate buffer for self-relative SD
     BYTE* selfRelativeSD = (BYTE*)MSVCRT$malloc(sdSize);
     if (!selfRelativeSD) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for self-relative SD");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for self-relative SD\n");
         return NULL;
     }
 
     // Convert to self-relative format
     if (!ADVAPI32$MakeSelfRelativeSD(pSD, (PSECURITY_DESCRIPTOR)selfRelativeSD, &sdSize)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to self-relative format");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to self-relative format\n");
         MSVCRT$free(selfRelativeSD);
         return NULL;
     }
@@ -1741,7 +1741,7 @@ PSECURITY_DESCRIPTOR ConvertBervalToSecurityDescriptor(BERVAL* sdBerval) {
     PSID pGroup = (PSID)MSVCRT$malloc(groupSize);
 
     if (!pAbsoluteSD || !pDacl || !pSacl || !pOwner || !pGroup) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate buffers for absolute SD");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate buffers for absolute SD\n");
         if (pAbsoluteSD) MSVCRT$free(pAbsoluteSD);
         if (pDacl) MSVCRT$free(pDacl);
         if (pSacl) MSVCRT$free(pSacl);
@@ -1754,7 +1754,7 @@ PSECURITY_DESCRIPTOR ConvertBervalToSecurityDescriptor(BERVAL* sdBerval) {
     if (!ADVAPI32$MakeAbsoluteSD(pSelfRelativeSD, pAbsoluteSD, &absSDSize, 
                                  pDacl, &daclSize, pSacl, &saclSize,
                                  pOwner, &ownerSize, pGroup, &groupSize)) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to absolute format");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to convert security descriptor to absolute format\n");
         MSVCRT$free(pAbsoluteSD);
         MSVCRT$free(pDacl);
         MSVCRT$free(pSacl);

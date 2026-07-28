@@ -98,7 +98,7 @@ char* GetDCHostName() {
         // Free the buffer allocated by DsGetDcNameA
         NETAPI32$NetApiBufferFree(pdcInfo);
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to identify DC. Are we domain joined?");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to identify DC. Are we domain joined?\n");
     }
     
     return dcHostname;
@@ -175,11 +175,11 @@ LDAP* InitializeLDAPConnection(const char* dcAddress, BOOL useLdaps, char** outD
     if (!dcAddress || MSVCRT$strlen(dcAddress) == 0) {
         discoveredDC = GetDCHostName();
         if (!discoveredDC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to discover DC");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to discover DC\n");
             return NULL;
         }
         targetDC = discoveredDC;
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Discovered DC: %s", targetDC);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Discovered DC: %s\n", targetDC);
     } else {
         targetDC = (char*)dcAddress;
     }
@@ -193,12 +193,12 @@ LDAP* InitializeLDAPConnection(const char* dcAddress, BOOL useLdaps, char** outD
         }
     }
 
-    //BeaconPrintf(CALLBACK_OUTPUT, "[*] Connecting to: %s:%d", targetDC, portNumber);
+    //BeaconPrintf(CALLBACK_OUTPUT, "[*] Connecting to: %s:%d\n", targetDC, portNumber);
     
     // Use ldap_init with hostname (ANSI version)
     pLdapConnection = WLDAP32$ldap_init((PCHAR)targetDC, portNumber);
     if (!pLdapConnection) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection on port %d", portNumber);
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection on port %d\n", portNumber);
         if (discoveredDC) MSVCRT$free(discoveredDC);
         return NULL;
     }
@@ -207,7 +207,7 @@ LDAP* InitializeLDAPConnection(const char* dcAddress, BOOL useLdaps, char** outD
     ULONG version = LDAP_VERSION3;
     result = WLDAP32$ldap_set_option(pLdapConnection, LDAP_OPT_VERSION, (void*)&version);
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set LDAP version: %lu", result);
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set LDAP version: %lu\n", result);
         WLDAP32$ldap_unbind_s(pLdapConnection);
         if (discoveredDC) MSVCRT$free(discoveredDC);
         return NULL;
@@ -217,7 +217,7 @@ LDAP* InitializeLDAPConnection(const char* dcAddress, BOOL useLdaps, char** outD
         // For LDAPS (port 636), enable SSL
         result = WLDAP32$ldap_set_option(pLdapConnection, LDAP_OPT_SSL, LDAP_OPT_ON);
         if (result != LDAP_SUCCESS) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to enable SSL: %lu", result);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to enable SSL: %lu\n", result);
             WLDAP32$ldap_unbind_s(pLdapConnection);
             if (discoveredDC) MSVCRT$free(discoveredDC);
             return NULL;
@@ -226,7 +226,7 @@ LDAP* InitializeLDAPConnection(const char* dcAddress, BOOL useLdaps, char** outD
         // Set certificate callback
         result = WLDAP32$ldap_set_option(pLdapConnection, LDAP_OPT_SERVER_CERTIFICATE, (void*)&ServerCertCallback);
         if (result != LDAP_SUCCESS) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set certificate callback: %lu", result);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set certificate callback: %lu\n", result);
         }
     } else {
         // For regular LDAP (port 389), enable signing and sealing
@@ -235,12 +235,12 @@ LDAP* InitializeLDAPConnection(const char* dcAddress, BOOL useLdaps, char** outD
         
         result = WLDAP32$ldap_set_option(pLdapConnection, LDAP_OPT_SIGN, &value);
         if (result != LDAP_SUCCESS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Warning: Failed to enable LDAP signing: %lu", result);
+            BeaconPrintf(CALLBACK_ERROR, "[!] Warning: Failed to enable LDAP signing: %lu\n", result);
         }
 
         result = WLDAP32$ldap_set_option(pLdapConnection, LDAP_OPT_ENCRYPT, &value);
         if (result != LDAP_SUCCESS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Warning: Failed to enable LDAP encryption: %lu", result);
+            BeaconPrintf(CALLBACK_ERROR, "[!] Warning: Failed to enable LDAP encryption: %lu\n", result);
         }
     }
 
@@ -248,7 +248,7 @@ LDAP* InitializeLDAPConnection(const char* dcAddress, BOOL useLdaps, char** outD
     result = WLDAP32$ldap_bind_s(pLdapConnection, NULL, NULL, LDAP_AUTH_NEGOTIATE);
     
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to bind to LDAP");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to bind to LDAP\n");
         PrintLdapError("Bind", result);
         WLDAP32$ldap_unbind_s(pLdapConnection);
         if (discoveredDC) MSVCRT$free(discoveredDC);
@@ -271,7 +271,7 @@ char* GetDefaultNamingContext(LDAP* ld, const char* dcHostname) {
     if (dcHostname && MSVCRT$strlen(dcHostname) > 0) {
         char* defaultNC = BuildDefaultNamingContextFromDC(dcHostname);
         if (defaultNC) {
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Default naming context: %s", defaultNC);
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] Default naming context: %s\n", defaultNC);
             return defaultNC;
         }
         // If building failed, fall through to query method
@@ -295,7 +295,7 @@ char* GetDefaultNamingContext(LDAP* ld, const char* dcHostname) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query rootDSE");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query rootDSE\n");
         return NULL;
     }
 
@@ -345,13 +345,13 @@ char* FindObjectDN(LDAP* ld, const char* samAccountName, const char* searchBase)
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object '%s'", samAccountName);
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for object '%s'\n", samAccountName);
         return NULL;
     }
 
     entry = WLDAP32$ldap_first_entry(ld, searchResult);
     if (!entry) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Object '%s' not found", samAccountName);
+        BeaconPrintf(CALLBACK_ERROR, "[-] Object '%s' not found\n", samAccountName);
         WLDAP32$ldap_msgfree(searchResult);
         return NULL;
     }
@@ -374,9 +374,9 @@ char* FindObjectDN(LDAP* ld, const char* samAccountName, const char* searchBase)
 void PrintLdapError(const char* context, ULONG ldapError) {
     char* errorMsg = WLDAP32$ldap_err2stringA(ldapError);
     if (errorMsg) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] %s - LDAP Error (0x%x): %s", context, ldapError, errorMsg);
+        BeaconPrintf(CALLBACK_ERROR, "[-] %s - LDAP Error (0x%x): %s\n", context, ldapError, errorMsg);
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] %s - LDAP Error: 0x%x", context, ldapError);
+        BeaconPrintf(CALLBACK_ERROR, "[-] %s - LDAP Error: 0x%x\n", context, ldapError);
     }
 }
 
@@ -552,11 +552,11 @@ void DisplayAttributeValue(LDAP* ld, LDAPMessage* entry, const char* attrName) {
                 char formatted[256];
                 if (MSVCRT$_stricmp(attrName, "objectGUID") == 0) {
                     FormatGUID((BYTE*)bvalues[j]->bv_val, formatted);
-                    BeaconPrintf(CALLBACK_OUTPUT, "%s: %s", attrName, formatted);
+                    BeaconPrintf(CALLBACK_OUTPUT, "%s: %s\n", attrName, formatted);
                 } else if (MSVCRT$_stricmp(attrName, "objectSid") == 0 || 
                            MSVCRT$_stricmp(attrName, "objectSID") == 0) {
                     FormatSID((BYTE*)bvalues[j]->bv_val, bvalues[j]->bv_len, formatted);
-                    BeaconPrintf(CALLBACK_OUTPUT, "%s: %s", attrName, formatted);
+                    BeaconPrintf(CALLBACK_OUTPUT, "%s: %s\n", attrName, formatted);
                 } else if (MSVCRT$_stricmp(attrName, "ntSecurityDescriptor") == 0) {
                     // Convert binary security descriptor to SDDL string
                     LPSTR sddlString = NULL;
@@ -570,7 +570,7 @@ void DisplayAttributeValue(LDAP* ld, LDAPMessage* entry, const char* attrName) {
                             DACL_SECURITY_INFORMATION | SACL_SECURITY_INFORMATION,
                             &sddlString,
                             &sddlLen)) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "%s: %s", attrName, sddlString);
+                        BeaconPrintf(CALLBACK_OUTPUT, "%s: %s\n", attrName, sddlString);
                         KERNEL32$LocalFree(sddlString);
                     } else {
                         // Fallback to hex display if SDDL conversion fails
@@ -583,26 +583,26 @@ void DisplayAttributeValue(LDAP* ld, LDAPMessage* entry, const char* attrName) {
                         if (bvalues[j]->bv_len > displayLen) {
                             MSVCRT$_snprintf(hexStr + pos, sizeof(hexStr) - pos, "... (%d bytes total)", bvalues[j]->bv_len);
                         }
-                        BeaconPrintf(CALLBACK_OUTPUT, "%s: %s", attrName, hexStr);
+                        BeaconPrintf(CALLBACK_OUTPUT, "%s: %s\n", attrName, hexStr);
                     }
                 }
             }
             WLDAP32$ldap_value_free_len(bvalues);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "%s: <not found>", attrName);
+            BeaconPrintf(CALLBACK_OUTPUT, "%s: <not found>\n", attrName);
         }
     } else {
         // Handle string attributes
         char** values = WLDAP32$ldap_get_values(ld, entry, (char*)attrName);
         if (values && values[0]) {
-            BeaconPrintf(CALLBACK_OUTPUT, "%s: %s", attrName, values[0]);
+            BeaconPrintf(CALLBACK_OUTPUT, "%s: %s\n", attrName, values[0]);
             // Print additional values if multi-valued
             for (int j = 1; values[j] != NULL; j++) {
-                BeaconPrintf(CALLBACK_OUTPUT, "%s: %s", attrName, values[j]);
+                BeaconPrintf(CALLBACK_OUTPUT, "%s: %s\n", attrName, values[j]);
             }
             WLDAP32$ldap_value_free(values);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "%s: <not found>", attrName);
+            BeaconPrintf(CALLBACK_OUTPUT, "%s: <not found>\n", attrName);
         }
     }
 }

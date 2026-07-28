@@ -13,7 +13,7 @@ void go(char *args, int alen) {
     char* dcAddress = ValidateInput(BeaconDataExtract(&parser, NULL));
 
     if (!groupIdentifier || MSVCRT$strlen(groupIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Group identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Group identifier is required\n");
         return;
     }
 
@@ -21,14 +21,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, FALSE, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -46,13 +46,13 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         groupDN = FindObjectDN(ld, groupIdentifier, searchBase);
         if (!groupDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Group '%s' not found", groupIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Group '%s' not found\n", groupIdentifier);
             MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
         }
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group DN: %s", groupDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group DN: %s\n", groupDN);
     }
 
     // Query the group's member attribute
@@ -70,7 +70,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query group members");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query group members\n");
         PrintLdapError("Query member", result);
         MSVCRT$free(groupDN);
         MSVCRT$free(defaultNC);
@@ -84,15 +84,15 @@ void go(char *args, int alen) {
         char** memberValues = WLDAP32$ldap_get_values(ld, entry, "member");
         if (memberValues) {
             int memberCount = WLDAP32$ldap_count_values(memberValues);
-            BeaconPrintf(CALLBACK_OUTPUT, "[+] Group has %d member(s):\n", memberCount);
-            BeaconPrintf(CALLBACK_OUTPUT, "Member DN");
-            BeaconPrintf(CALLBACK_OUTPUT, "=========");
+            
+            BeaconPrintf(CALLBACK_OUTPUT, "Member DN\n");
+            BeaconPrintf(CALLBACK_OUTPUT, "=========\n");
             for (int i = 0; memberValues[i] != NULL; i++) {
-                BeaconPrintf(CALLBACK_OUTPUT, "%s", memberValues[i]);
+                BeaconPrintf(CALLBACK_OUTPUT, "%s\n", memberValues[i]);
             }
             WLDAP32$ldap_value_free(memberValues);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] Group has no members");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Group has no members\n");
         }
     }
 

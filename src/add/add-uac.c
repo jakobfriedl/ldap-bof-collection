@@ -90,29 +90,29 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
 
     if (!flagsValue || MSVCRT$strlen(flagsValue) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Flags are required (e.g., DONT_REQ_PREAUTH,DONT_EXPIRE_PASSWD)");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Flags are required (e.g., DONT_REQ_PREAUTH,DONT_EXPIRE_PASSWD)\n");
         return;
     }
 
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Flags to add: %s", flagsValue);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Flags to add: %s\n", flagsValue);
 
     DWORD flagsToAdd = ParseUACFlags(flagsValue);
     if (flagsToAdd == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No valid flags parsed");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No valid flags parsed\n");
         return;
     }
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed flags: 0x%08X", flagsToAdd);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Parsed flags: 0x%08X\n", flagsToAdd);
 
     // Initialize LDAP connection
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
@@ -121,7 +121,7 @@ void go(char *args, int alen) {
     if (!isTargetDN) {
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -140,7 +140,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -154,7 +154,7 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_search_s(ld, targetDN, LDAP_SCOPE_BASE, "(objectClass=*)", attrs, 0, &searchResult);
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read current UAC");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to read current UAC\n");
         MSVCRT$free(targetDN);
         if (defaultNC) MSVCRT$free(defaultNC);
         if (dcHostname) MSVCRT$free(dcHostname);
@@ -175,7 +175,7 @@ void go(char *args, int alen) {
 
     // Calculate new UAC value
     DWORD newUAC = currentUAC | flagsToAdd;
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Current UAC: 0x%08X -> New UAC: 0x%08X", currentUAC, newUAC);
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Current UAC: 0x%08X -> New UAC: 0x%08X\n", currentUAC, newUAC);
 
     // Set new UAC value
     char uacString[32];
@@ -192,9 +192,9 @@ void go(char *args, int alen) {
     result = WLDAP32$ldap_modify_s(ld, targetDN, mods);
 
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added UAC flags");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added UAC flags\n");
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to modify UAC");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to modify UAC\n");
         PrintLdapError("Modify UAC", result);
     }
 

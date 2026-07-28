@@ -90,32 +90,32 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
 
     if (!flagsValue || MSVCRT$strlen(flagsValue) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Flags are required (e.g., NORMAL_ACCOUNT,DONT_EXPIRE_PASSWD)");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Flags are required (e.g., NORMAL_ACCOUNT,DONT_EXPIRE_PASSWD)\n");
         return;
     }
 
     DWORD newUAC = ParseUACFlags(flagsValue);
     if (newUAC == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No valid flags parsed");
+        BeaconPrintf(CALLBACK_ERROR, "[-] No valid flags parsed\n");
         return;
     }
 
     // Safety check: ensure account type flag is present
     if ((newUAC & UF_ACCOUNT_TYPE_MASK) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[!] WARNING: No account type flag specified!");
-        BeaconPrintf(CALLBACK_ERROR, "[!] Include NORMAL_ACCOUNT, WORKSTATION_TRUST_ACCOUNT, or SERVER_TRUST_ACCOUNT");
+        BeaconPrintf(CALLBACK_ERROR, "[!] WARNING: No account type flag specified!\n");
+        BeaconPrintf(CALLBACK_ERROR, "[!] Include NORMAL_ACCOUNT, WORKSTATION_TRUST_ACCOUNT, or SERVER_TRUST_ACCOUNT\n");
         return;
     }
 
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
@@ -123,7 +123,7 @@ void go(char *args, int alen) {
     if (!isTargetDN) {
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -139,7 +139,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -161,9 +161,9 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_modify_s(ld, targetDN, mods);
 
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully set UAC to 0x%08X", newUAC);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully set UAC to 0x%08X\n", newUAC);
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set UAC");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to set UAC\n");
         PrintLdapError("Set UAC", result);
     }
 

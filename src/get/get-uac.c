@@ -39,13 +39,13 @@ static const UAC_FLAG_MAP uacFlags[] = {
 };
 
 void PrintUACFlags(DWORD uacValue) {
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Current UAC value: 0x%08X (%lu)", uacValue, uacValue);
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Active flags:");
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Current UAC value: 0x%08X (%lu)\n", uacValue, uacValue);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Active flags:\n");
 
     BOOL foundAny = FALSE;
     for (int i = 0; uacFlags[i].name != NULL; i++) {
         if (uacValue & uacFlags[i].value) {
-            BeaconPrintf(CALLBACK_OUTPUT, "    %-35s (0x%08X) - %s",
+            BeaconPrintf(CALLBACK_OUTPUT, "    %-35s (0x%08X) - %s\n",
                         uacFlags[i].name,
                         uacFlags[i].value,
                         uacFlags[i].description);
@@ -54,7 +54,7 @@ void PrintUACFlags(DWORD uacValue) {
     }
 
     if (!foundAny) {
-        BeaconPrintf(CALLBACK_OUTPUT, "    (No flags set)");
+        BeaconPrintf(CALLBACK_OUTPUT, "    (No flags set)\n");
     }
 }
 
@@ -70,7 +70,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
 
     if (!targetIdentifier || MSVCRT$strlen(targetIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Target identifier is required\n");
         return;
     }
 
@@ -78,7 +78,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
@@ -87,7 +87,7 @@ void go(char *args, int alen) {
     if (!isTargetDN) {
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -106,7 +106,7 @@ void go(char *args, int alen) {
         char* searchBase = (searchOu && MSVCRT$strlen(searchOu) > 0) ? searchOu : defaultNC;
         targetDN = FindObjectDN(ld, targetIdentifier, searchBase);
         if (!targetDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found", targetIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Target '%s' not found\n", targetIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
@@ -129,7 +129,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query UAC");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to query UAC\n");
         PrintLdapError("Query UAC", result);
         MSVCRT$free(targetDN);
         if (defaultNC) MSVCRT$free(defaultNC);
@@ -146,7 +146,7 @@ void go(char *args, int alen) {
             PrintUACFlags(uacValue);
             WLDAP32$ldap_value_free(values);
         } else {
-            BeaconPrintf(CALLBACK_OUTPUT, "[*] No userAccountControl attribute found");
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] No userAccountControl attribute found\n");
         }
     }
 

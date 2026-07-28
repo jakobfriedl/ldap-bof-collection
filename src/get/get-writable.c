@@ -16,14 +16,14 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
 
     // Get default naming context
     char* defaultNC = GetDefaultNamingContext(ld, dcHostname);
     if (!defaultNC) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
         if (dcHostname) MSVCRT$free(dcHostname);
         CleanupLDAP(ld);
         return;
@@ -56,7 +56,7 @@ void go(char *args, int alen) {
     );
 
     if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for objects");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to search for objects\n");
         PrintLdapError("Search objects", result);
         MSVCRT$free(defaultNC);
         if (dcHostname) MSVCRT$free(dcHostname);
@@ -83,14 +83,14 @@ void go(char *args, int alen) {
             if (detailed) {
                 // Show DN
                 if (dnValues && dnValues[0]) {
-                    BeaconPrintf(CALLBACK_OUTPUT, "distinguishedName: %s", dnValues[0]);
+                    BeaconPrintf(CALLBACK_OUTPUT, "distinguishedName: %s\n", dnValues[0]);
                 }
                 
                 // Show all writable attributes
                 if (hasWritePerms) {
                     int i = 0;
                     while (effectiveAttrs[i] != NULL) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "%s: WRITE", effectiveAttrs[i]);
+                        BeaconPrintf(CALLBACK_OUTPUT, "%s: WRITE\n", effectiveAttrs[i]);
                         i++;
                     }
                 }
@@ -99,27 +99,27 @@ void go(char *args, int alen) {
                 if (hasCreateChild) {
                     int i = 0;
                     while (childClasses[i] != NULL) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "%s: CREATE_CHILD", childClasses[i]);
+                        BeaconPrintf(CALLBACK_OUTPUT, "%s: CREATE_CHILD\n", childClasses[i]);
                         i++;
                     }
                 }
                 
-                BeaconPrintf(CALLBACK_OUTPUT, "\n");  // Blank line between objects
+                  // Blank line between objects
             } else {
                 // Just show DN and permission type(s)
                 if (dnValues && dnValues[0]) {
-                    BeaconPrintf(CALLBACK_OUTPUT, "distinguishedName: %s", dnValues[0]);
+                    BeaconPrintf(CALLBACK_OUTPUT, "distinguishedName: %s\n", dnValues[0]);
                     
                     // Show which permission types apply
                     if (hasWritePerms && hasCreateChild) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "permission: WRITE, CREATE_CHILD");
+                        BeaconPrintf(CALLBACK_OUTPUT, "permission: WRITE, CREATE_CHILD\n");
                     } else if (hasWritePerms) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "permission: WRITE");
+                        BeaconPrintf(CALLBACK_OUTPUT, "permission: WRITE\n");
                     } else if (hasCreateChild) {
-                        BeaconPrintf(CALLBACK_OUTPUT, "permission: CREATE_CHILD");
+                        BeaconPrintf(CALLBACK_OUTPUT, "permission: CREATE_CHILD\n");
                     }
                     
-                    BeaconPrintf(CALLBACK_OUTPUT, "\n");  // Blank line between objects
+                      // Blank line between objects
                 }
             }
         }
@@ -134,5 +134,5 @@ void go(char *args, int alen) {
     MSVCRT$free(defaultNC);
     MSVCRT$free(dcHostname);
     CleanupLDAP(ld);
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Found %d objects with write permissions", writableCount);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Found %d objects with write permissions\n", writableCount);
 }

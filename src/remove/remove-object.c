@@ -14,7 +14,7 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!objectIdentifier || MSVCRT$strlen(objectIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Object identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Object identifier is required\n");
         return;
     }
     
@@ -22,7 +22,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
@@ -34,7 +34,7 @@ void go(char *args, int alen) {
         
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -55,8 +55,8 @@ void go(char *args, int alen) {
         objectDN = FindObjectDN(ld, objectIdentifier, searchBase);
         
         if (!objectDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve object DN");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Object '%s' not found", objectIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve object DN\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Object '%s' not found\n", objectIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             CleanupLDAP(ld);
             return;
@@ -67,19 +67,19 @@ void go(char *args, int alen) {
     ULONG result = WLDAP32$ldap_delete_s(ld, objectDN);
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully deleted object");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s", objectDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully deleted object\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] DN: %s\n", objectDN);
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to delete object");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to delete object\n");
         PrintLdapError("Delete object", result);
         
         // Provide helpful hints
         if (result == LDAP_NO_SUCH_OBJECT) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Object does not exist");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Object does not exist\n");
         } else if (result == LDAP_INSUFFICIENT_RIGHTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to delete object");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to delete object\n");
         } else if (result == LDAP_INVALID_DN_SYNTAX) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax\n");
         }
     }
     

@@ -17,18 +17,18 @@ void go(char *args, int alen) {
     int useLdaps = BeaconDataInt(&parser);
     
     if (!memberIdentifier || MSVCRT$strlen(memberIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Member identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Member identifier is required\n");
         return;
     }
     
     if (!groupIdentifier || MSVCRT$strlen(groupIdentifier) == 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Group identifier is required");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Group identifier is required\n");
         return;
     }
     
     
     if (searchOu && MSVCRT$strlen(searchOu) > 0) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[*] Search OU: %s", searchOu);
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Search OU: %s\n", searchOu);
     }
     
     if (dcAddress && MSVCRT$strlen(dcAddress) > 0) {
@@ -41,7 +41,7 @@ void go(char *args, int alen) {
     char* dcHostname = NULL;
     LDAP* ld = InitializeLDAPConnection(dcAddress, useLdaps, &dcHostname);
     if (!ld) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to initialize LDAP connection\n");
         return;
     }
     
@@ -54,7 +54,7 @@ void go(char *args, int alen) {
         
         defaultNC = GetDefaultNamingContext(ld, dcHostname);
         if (!defaultNC) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context");
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to get default naming context\n");
             if (dcHostname) MSVCRT$free(dcHostname);
             CleanupLDAP(ld);
             return;
@@ -75,13 +75,13 @@ void go(char *args, int alen) {
         memberDN = FindObjectDN(ld, memberIdentifier, searchBase);
         
         if (!memberDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve member DN");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Member '%s' not found", memberIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve member DN\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Member '%s' not found\n", memberIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             CleanupLDAP(ld);
             return;
         }
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Member DN: %s", memberDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Member DN: %s\n", memberDN);
     }
     
     // Resolve group DN
@@ -98,14 +98,14 @@ void go(char *args, int alen) {
         groupDN = FindObjectDN(ld, groupIdentifier, searchBase);
         
         if (!groupDN) {
-            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve group DN");
-            BeaconPrintf(CALLBACK_ERROR, "[!] Group '%s' not found", groupIdentifier);
+            BeaconPrintf(CALLBACK_ERROR, "[-] Failed to resolve group DN\n");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Group '%s' not found\n", groupIdentifier);
             if (defaultNC) MSVCRT$free(defaultNC);
             MSVCRT$free(memberDN);
             CleanupLDAP(ld);
             return;
         }
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group DN: %s", groupDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group DN: %s\n", groupDN);
     }
     
     // Prepare LDAP modification to add member
@@ -118,26 +118,26 @@ void go(char *args, int alen) {
     LDAPModA* mods[] = { &member_mod, NULL };
     
     // Apply the modification
-    BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding member to group...");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Adding member to group...\n");
     ULONG result = WLDAP32$ldap_modify_s(ld, groupDN, mods);
     
     if (result == LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added member to group");
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Member DN: %s", memberDN);
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group DN: %s", groupDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added member to group\n");
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Member DN: %s\n", memberDN);
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Group DN: %s\n", groupDN);
     } else {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add member to group");
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add member to group\n");
         PrintLdapError("Modify group", result);
         
         // Provide helpful hints
         if (result == LDAP_ALREADY_EXISTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Member is already in the group");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Member is already in the group\n");
         } else if (result == LDAP_INSUFFICIENT_RIGHTS) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to modify group membership");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Insufficient permissions to modify group membership\n");
         } else if (result == LDAP_NO_SUCH_OBJECT) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Group or member object does not exist");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Group or member object does not exist\n");
         } else if (result == LDAP_INVALID_DN_SYNTAX) {
-            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax");
+            BeaconPrintf(CALLBACK_ERROR, "[!] Invalid DN syntax\n");
         }
     }
     
