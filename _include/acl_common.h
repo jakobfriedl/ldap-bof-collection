@@ -105,10 +105,15 @@
 */
 
 // Access Mask - Standard Rights
+#ifndef DELETE_ACCESS
 #define DELETE_ACCESS                     0x00010000
+#endif
+#ifndef WRITE_DACL
 #define WRITE_DACL                        0x00040000
+#endif
 
 // Access Mask - Specific Rights (DS Objects)
+#ifndef ADS_RIGHT_DS_CREATE_CHILD
 #define ADS_RIGHT_DS_CREATE_CHILD         0x00000001
 #define ADS_RIGHT_DS_DELETE_CHILD         0x00000002
 #define ADS_RIGHT_ACTRL_DS_LIST           0x00000004
@@ -118,6 +123,7 @@
 #define ADS_RIGHT_DS_DELETE_TREE          0x00000040
 #define ADS_RIGHT_DS_LIST_OBJECT          0x00000080
 #define ADS_RIGHT_DS_CONTROL_ACCESS       0x00000100
+#endif
 
 // ============================================================================
 // WELL-KNOWN SIDS AND GUIDS
@@ -149,29 +155,8 @@
 // STRUCTURES
 // ============================================================================
 
-// ACE Header structure
-typedef struct _ACE_HEADER {
-    BYTE AceType;
-    BYTE AceFlags;
-    WORD AceSize;
-} ACE_HEADER, *PACE_HEADER;
-
-// Standard ACCESS_ALLOWED_ACE structure
-typedef struct _ACCESS_ALLOWED_ACE {
-    ACE_HEADER Header;
-    ACCESS_MASK Mask;
-    DWORD SidStart;  // First DWORD of SID
-} ACCESS_ALLOWED_ACE, *PACCESS_ALLOWED_ACE;
-
-// Object ACE structure (for extended rights)
-typedef struct _ACCESS_ALLOWED_OBJECT_ACE {
-    ACE_HEADER Header;
-    ACCESS_MASK Mask;
-    DWORD Flags;
-    GUID ObjectType;
-    GUID InheritedObjectType;
-    DWORD SidStart;
-} ACCESS_ALLOWED_OBJECT_ACE, *PACCESS_ALLOWED_OBJECT_ACE;
+// ACE_HEADER, ACCESS_ALLOWED_ACE, ACCESS_ALLOWED_OBJECT_ACE
+// provided by <windows.h> (winnt.h)
 
 // Parsed ACE information structure (for display)
 typedef struct _PARSED_ACE_INFO {
